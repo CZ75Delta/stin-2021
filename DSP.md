@@ -38,6 +38,7 @@ Obsah
 Účelem tohoto dokumentu je představit detailní popis Covid-19 Trackeru. Vysvětlí účel a funkce programu, jeho rozhraní, podmínky za kterých musí pracovat a jak bude reagovat na externí podněty. Dokument je určen pro vývojáře a bude navrhnut zákazníkovi ke schválení.
 
 ### 1.2 Rozsah Programu
+Program bude sloužit ke sledování vybraných informací o nemoci Covid-19. Bude navržen tak, aby požadované informace byly přehledně zobrazeny. Specificky bude program porovnávat data z českých a zahraničních zdrojů a zobrazovat rozdíly mezi nimi, pokud takové rozdíly existují. Tyto informace bude program ukládat do lokální relační databáze.
 
 ### 1.3 Glosář
 | Pojem            | Definice         |
@@ -54,12 +55,43 @@ Následující kapitola, Celkový popis, tohoto dokumentu poskytuje přehled fun
 
 ## 2. Celkový popis
 ### 2.1 Prostředí Programu
+![Prostředí programu](https://i.imgur.com/zZsgU2l.png "Prostředí programu")
+*Obrázek 1 - Prostředí programu*
+
+Program má jednoho aktéra, uživatele, který k systému přistupuje přímo. Uživatel může zvolit, která data chce zobrazit a může provést manuální aktualizaci zobrazovaných dat.
 
 ### 2.2 Funkční Požadavky
+Tato sekce blíže popisuje jednotlivé případy použití programu. 
+
+#### 2.2.1 Případ použití: **Zobrazení dat**
+##### Diagram:
+![Diagram Zobrazení dat](https://i.imgur.com/R78R8BD.png "Diagram Zobrazení dat")
+##### Krátký popis:
+Uživatel si zvolí která data chce zobrazit a upraví parametry zobrazení.
+##### Popis kroků:
+1. Uživatel si volí která data chce zobrazit.
+2. Program zobrazí požadovaná data.
+3. Uživatel upraví parametry zobrazení.
+4. Program upraví zobrazení podle parametrů.
+##### Reference:
+
+#### 2.2.2 Případ použití: **Aktualizace dat**
+##### Diagram:
+![Diagram Aktualizace dat](https://i.imgur.com/WvbYrR0.png "Diagram Aktualizace dat")
+##### Krátký popis:
+Uživatel se rozhodne provést manuální aktualizaci dat.
+##### Popis kroků:
+1. Uživatel stiskne tlačítko aktualizace dat.
+2. Program zkontroluje zda je k dispozici aktualizace.
+2a. Pokud existuje aktualizace program provede aktuazlizaci zobrazení
+2b. Pokud neexistuje aktualizace program upozorní uživatele.
+##### Reference:
 
 ### 2.3 Charekteristiky Uživatelů
+Od uživatele se očekává základní znalost použití programů v Microsoft Windows. Dále se také očekává znalost čtení grafů a použítí ovládacích prvků jako jsou tlačítka, rozbalovací nabídky apod.
 
 ### 2.4 Doplňkové Požadavky
+Program poběží na počítači s operačním systémem Windows a připojením k Internetu přes síť TUL. Počítač bude mít nainstalován framework .NET 5, který bude dodán společně s programem. Databázi bude spravovat program sám a není k ní nutné instalovat žádný další software.
 
 ## 3. Specifikace Požadavků
 
