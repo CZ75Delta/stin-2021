@@ -108,6 +108,8 @@ Program poběží na počítači s operačním systémem Windows a připojením 
 ### 3.3 Detailní Doplňkové Požadavky
 
 #### 3.3.2 Bezpečnost
+Uživatel má přístup pouze k zobrazování a aktualizace dat, není tedy možný z jeho strany útok na integritu dat. 
+Přístup k datovým serverům je zařízen pomocí HTTPS dotazů. Pokud server nepředá "škodlivé" informace, nemělo by se být čeho bát.
 
 #### 3.3.3 Spolehlivost
 
