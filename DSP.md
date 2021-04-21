@@ -29,6 +29,8 @@ Obsah
     * 3.3.1 [Bezpečnost](#331-bezpečnost)
     * 3.3.2 [Spolehlivost](#332-spolehlivost)
     * 3.3.3 [Dostupnost](#333-dostupnost)
+    * 3.3.4 [Časová náročnost](#334-časová-náročnost)
+    * 3.3.5 [Uzávěrka](#335-uzávěrka)
 
 ## 1. Úvod
 ### 1.1 Účel Dokumentu
@@ -215,3 +217,9 @@ Aplikace musí běžet alespoň týden bez vnějšího podnětu, automaticky akt
 
 #### 3.3.3 Dostupnost
 Aplikace musí být neustále dostupná, i v případě výpadku internetového připojení. Pokud nemůže aplikace data stáhnout musí být stále schopna zobrazovat již stažená data.
+
+#### 3.3.4 Časová náročnost
+Odhad doby tvorby aplikace je zhruba 2 týdny.
+
+#### 3.3.5 Uzávěrka
+Týden před zkouškou :D
