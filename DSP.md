@@ -22,16 +22,13 @@ Obsah
 * 3 [Specifikace Požadavků](#3-specifikace-požadavků)
   * 3.1 [Externí Rozhraní](#31-externí-rozhraní)
     * 3.1.1 [Uživatelské Rozhraní](#311-uživatelské-rozhraní)
-    * 3.1.2 [Hardwarové Rozhraní](#312-hardwarové-rozhraní)
-    * 3.1.3 [Softwarové Rozhraní](#313-softwarové-rozhraní)
+    * 3.1.2 [Softwarové Rozhraní](#312-softwarové-rozhraní)
+    * 3.1.3 [Hardwarové Požadavky](#313-hardwarové-požadavky)
   * 3.2 [Funkční Požadavky](#32-funkční-požadavky)
   * 3.3 [Detailní Doplňkové Požadavky](#33-detailní-doplňkové-požadavky)
-    * 3.3.2 [Bezpečnost](#332-bezpečnost)
-    * 3.3.3 [Spolehlivost](#333-spolehlivost)
-    * 3.3.4 [Dostupnost](#334-dostupnost)
-    * 3.3.5 [Instalace](#335-instalace)
-    * 3.3.6 [Distribuce](#336-distribuce)
-    * 3.3.7 [Uzávěrka](#337-uzávěrka)
+    * 3.3.1 [Bezpečnost](#331-bezpečnost)
+    * 3.3.2 [Spolehlivost](#332-spolehlivost)
+    * 3.3.3 [Dostupnost](#333-dostupnost)
 
 ## 1. Úvod
 ### 1.1 Účel Dokumentu
