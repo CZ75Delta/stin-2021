@@ -91,51 +91,60 @@ Uživatel se rozhodne provést manuální aktualizaci dat.
 Od uživatele se očekává základní znalost použití programů v Microsoft Windows. Dále se také očekává znalost čtení grafů a použítí ovládacích prvků jako jsou tlačítka, rozbalovací nabídky apod.
 
 ### 2.4 Doplňkové Požadavky
-Program poběží na počítači s operačním systémem Windows a připojením k Internetu přes síť TUL. Počítač bude mít nainstalován framework .NET 5, který bude dodán společně s programem. Databázi bude spravovat program sám a není k ní nutné instalovat žádný další software.
+Program poběží na počítači s operačním systémem Windows 10 a připojením k Internetu přes síť TUL. Počítač bude mít nainstalován framework .NET 5, který bude dodán společně s programem. Databázi bude spravovat program sám a není k ní nutné instalovat žádný další software.
 
 ## 3. Specifikace Požadavků
 ### 3.1 Externí Rozhraní
-Tato sekce popisuje všechny vstupně výstupní požadavky programu.
+Tato sekce popisuje všechny vstupně výstupní požadavky a řešení programu.
 
 #### 3.1.1 Uživatelské Rozhraní
+Uživatelské rozhraní bude řešeno pomocí WPF. V rozhraní bude možné přepínat mezi dvěma taby pomocí prvku TabControl. Ve spodní části okna bude ProgressBar aktualizace dat, tlačítko pro manuální aktualizaci dat a tetxtovou reprezentaci aktuálního stavu programu.
+
+První tab bude zobrazovat porovnání dat o nakažených nemocí Covid-19 v ČR. Toho dosáhne ListBoxem, ve kterém bude možné zvolit, která data se mají zobrazit k porovnání v grafu nad ním.
+![Uživatelské rozhraní 1](https://i.imgur.com/DHCs1Od.png "Uživatelské rozhraní 1")
+
+Druhý tab zobrazuje porovnání ČR a až čtyř dalších zemí v grafu. Požadované země se dají zvolit v ListBoxu, ve kterém se dá vyhledávat pomocí vyhledávacího políčka nad ním.
+![Uživatelské rozhraní 2](https://i.imgur.com/KhyOE68.png "Uživatelské rozhraní 2")
 
 #### 3.1.2 Softwarové Rozhraní
-##### Název: **Microsoft Windows**
-###### Verze: 19H2 (18363) - 20H2 (19042)
-###### Krátký popis: Zvolený operační systém nutný pro běh programu.
+Použité nástroje:
+* ##### Název: **Microsoft Windows**
+  ###### Verze: 19H2 (18363) - 20H2 (19042)
+  ###### Krátký popis: Zvolený operační systém nutný pro běh programu.
 
-##### Název: **.NET 5**
-###### Verze: 5.0.5
-###### Krátký popis: Zvolený framework, který bude nainstalován společně s aplikací.
+* ##### Název: **.NET 5**
+  ###### Verze: 5.0.5
+  ###### Krátký popis: Zvolený framework, který bude nainstalován společně s aplikací.
 
-##### Název: **C#**
-###### Verze: 9.0
-###### Krátký popis: Zvolený programovací jazyk.
+* ##### Název: **C#**
+  ###### Verze: 9.0
+  ###### Krátký popis: Zvolený programovací jazyk.
 
-##### Název: **Microsoft EntityFrameworkCore Sqlite**
-###### Verze: 5.0.5
-###### Krátký popis: Zvolený databázový systém pro ukládání všech dat.
+* ##### Název: **[Microsoft.EntityFrameworkCore.Sqlite](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Sqlite/)**
+  ###### Verze: 5.0.5
+  ###### Krátký popis: Zvolený databázový systém a ORM pro ukládání dat.
 
-##### Název: **Newtonsoft.Json**
-###### Verze: 13.0.1
-###### Krátký popis: Nástroj pro zpracování dat ve formátu JSON.
+* ##### Název: **[Newtonsoft.Json](https://www.nuget.org/packages/Newtonsoft.Json/)**
+  ###### Verze: 13.0.1
+  ###### Krátký popis: Nástroj pro zpracování dat ve formátu JSON.
+ 
+* ##### Název: **[LiveCharts](https://github.com/beto-rodriguez/LiveCharts2)**
+  ###### Verze: 2
+  ###### Krátký popis: Nástroj pro zpracování dat ve formátu JSON.
 
-#### 3.1.3 Hardwarové Rozhraní
-Počítač by měl být schopen alespoň základní požadavky pro běh systému Windows 10 a být připojen k internetu.
+#### 3.1.3 Hardwarové Požadavky
+Počítač by měl být splňovat alespoň základní požadavky pro běh systému Windows 10 a být připojen k internetu.
+
 ### 3.2 Funkční Požadavky
 
 ### 3.3 Detailní Doplňkové Požadavky
 
-#### 3.3.2 Bezpečnost
+#### 3.3.1 Bezpečnost
 Uživatel má přístup pouze k zobrazování a aktualizace dat, není tedy možný z jeho strany útok na integritu dat. 
 Přístup k datovým serverům je zařízen pomocí HTTPS dotazů. Pokud server nepředá "škodlivé" informace, nemělo by se být čeho bát.
 
-#### 3.3.3 Spolehlivost
+#### 3.3.2 Spolehlivost
+Aplikace musí běžet alespoň týden bez vnějšího podnětu, automaticky aktualizovat data a ta následně zobrazovat.
 
-#### 3.3.4 Dostupnost
-
-#### 3.3.5 Instalace
-
-#### 3.3.6 Distribuce
-
-#### 3.3.7 Uzávěrka
+#### 3.3.3 Dostupnost
+Aplikace musí být neustále dostupná, i v případě výpadku internetového připojení. Pokud nemůže aplikace data stáhnout musí být stále schopna zobrazovat již stažená data.
