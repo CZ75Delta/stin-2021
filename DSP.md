@@ -103,7 +103,7 @@ Druhý tab zobrazuje porovnání ČR a až čtyř dalších zemí v grafu. Poža
 ![Uživatelské rozhraní 2](https://i.imgur.com/lpkEzCT.png "Uživatelské rozhraní 2")
 
 #### 3.1.2 Softwarové Rozhraní
-Aplikace bude porovnávat datové sady uložené v SQLite databázi ve složce ze které je spuštěn program. Data v této aplikaci bude získávat ze dvou zdrojů. Aplikace bude posílat pravidelné "I'm alive" notifikace na webhook Telegram bota. Na stejný webhook bude také odesílat případné chyby běhu programu. Kontrola, zda jsou nová data pro aktualizaci bude probíhat vždy ve stanovený časový úsek v intervalech 5 minut.
+Aplikace bude porovnávat datové sady uložené v SQLite databázi ve složce ze které je spuštěn program. Data v této aplikaci bude získávat ze dvou zdrojů. Aplikace bude logovat chyby a informace na Telegram. Logy bude odesílat po každé aktualizaci dat, či nastalé chybě. Kontrola, zda jsou nová data pro aktualizaci bude probíhat vždy ve stanovený časový úsek v intervalech 5 minut.
 
 Zdroje dat:
 * ##### Název: **[MZČR Základní Přehled](https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json)**
