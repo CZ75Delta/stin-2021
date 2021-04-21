@@ -1,7 +1,7 @@
 # Dokument Specifikace Požadavků
 ## Covid-19 Tracker - Škrbel, Novotný, Schönherr, Vican
 
-- Verze 0.1 
+- Verze 0.4.6 Beta (pfft) 
 - Připravil Vít Škrbel
 - FM TUL
 - 20\. 4\. 2021
