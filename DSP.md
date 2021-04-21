@@ -41,11 +41,10 @@ Obsah
 Program bude sloužit ke sledování vybraných informací o nemoci Covid-19. Bude navržen tak, aby požadované informace byly přehledně zobrazeny. Specificky bude program porovnávat data z českých a zahraničních zdrojů a zobrazovat rozdíly mezi nimi, pokud takové rozdíly existují. Tyto informace bude program ukládat do lokální relační databáze.
 
 ### 1.3 Glosář
-| Pojem            | Definice         |
-| -------------    |:-------------:   |
-|                  |                  | 
-|                  |                  |
-|                  |                  |
+| Pojem | Definice |
+| --- | ---|
+| Dokument specifikace požadavků | Dokument popisující věechny funkce navrženého programu a omezení ve kterých musí pracovat. Například tento dokument | 
+| Covid-19 | Covid-19 z anglického spojení coronavirus disease 2019 je vysoce infekční onemocnění, které je způsobeno koronavirem SARS-CoV-2. První případ byl identifikován v čínském Wu-chanu v prosinci 2019. Od té doby se virus rozšířil po celém světě, což způsobilo přetrvávající pandemii.  |
 
 ### 1.4 Zdroje
 IEEE 830-1998, 1998. *IEEE Recommended Practice for Software Requirements Specifications.* New York, US: The Institute of Electrical and Electronics Engineers.
@@ -107,6 +106,33 @@ Druhý tab zobrazuje porovnání ČR a až čtyř dalších zemí v grafu. Poža
 ![Uživatelské rozhraní 2](https://i.imgur.com/KhyOE68.png "Uživatelské rozhraní 2")
 
 #### 3.1.2 Softwarové Rozhraní
+Aplikace bude porovnávat datové sady uložené v SQLite databázi ve složce ze které je spuštěn program. Data v této aplikaci bude získávat ze dvou zdrojů. Aplikace bude posílat pravidelné "I'm alive" notifikace na webhook Telegram bota. Na stejný webhook bude také odesílat případné chyby běhu programu.
+
+Zdroje dat:
+* ##### Název: **[MZČR Základní Přehled](https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json)**
+  ###### Formát dat: JSON
+  ![Schéma dat](https://i.imgur.com/iyTW6M1.png "Schéma dat")
+  ###### Čas aktualizace: ~7:00 – 9:00 CET 
+  ###### Krátký popis: Stručný náhled na základní epidemiologická data o pandemii COVID-19 v ČR. Datová sada obsahuje aktuální kumulativní počet provedených PCR a antigenních testů (včetně informace za předchozí den), potvrzené případy celkem a ve věkové skupině 65+(včetně informace za předchozí den), aktivní případy, vyléčené, úmrtí, očkování a hopitalizované pacienty.
+  
+* ##### Název: **[MZČR Přehled vykázaných očkování podle krajů ČR](https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/ockovani.json)**
+  ###### Formát dat: JSON
+  ![Schéma dat](https://i.imgur.com/pzvLXsj.png "Schéma dat")
+  ###### Čas aktualizace: ~7:00 – 9:00 CET 
+  ###### Krátký popis: Datová sada poskytuje agregovaná data o vykázaných očkováních na úrovni krajů ČR. Každý řádek přehledu popisuje počet vykázaných očkování v daném dni, za věkovou skupinu, s použitím vybrané očkovací látky a ve vybraném kraji. Za jeden den tedy přehled obsahuje maximálně X řádků, kde X = počet krajů (14) x počet věkových skupin (15) x počet druhů očkovacích látek (v okamžik publikace 2) = 630. Data jsou aktualizována k času 20.00 h předchozího dne a mohou se zpětně mírně měnit z důvodu průběžného doplňování.
+
+* ##### Název: **[WHO Denní Přehled Nakažených a Mrtvých](https://covid19.who.int/WHO-COVID-19-global-data.csv)**
+  ###### Formát dat: CSV
+  ![Schéma dat](https://i.imgur.com/pVPPC6V.png "Schéma dat")
+  ###### Čas aktualizace: ~0:00 – 2:00 CET 
+  ###### Krátký popis: Datová sada o připadech Covid-19 nahlášených WHO.
+
+* ##### Název: **[WHO Data o Vakcínách](https://covid19.who.int/who-data/vaccination-data.csv)**
+  ###### Formát dat: CSV
+  ![Schéma dat](https://i.imgur.com/frf38zN.png "Schéma dat")
+  ###### Čas aktualizace: ~0:00 – 2:00 CET 
+  ###### Krátký popis: Datová sada o vakcinaci proti Covid-19 od WHO.
+
 Použité nástroje:
 * ##### Název: **Microsoft Windows**
   ###### Verze: 19H2 (18363) - 20H2 (19042)
