@@ -102,28 +102,23 @@ Tato sekce popisuje všechny vstupně výstupní požadavky programu.
 #### 3.1.2 Softwarové Rozhraní
 ##### Název: **Microsoft Windows**
 ###### Verze: 19H2 (18363) - 20H2 (19042)
-###### Krátký popis:
-Zvolený operační systém nutný pro běh programu.
+###### Krátký popis: Zvolený operační systém nutný pro běh programu.
 
 ##### Název: **.NET 5**
 ###### Verze: 5.0.5
-###### Krátký popis:
-Zvolený framework, který bude nainstalován společně s aplikací.
+###### Krátký popis: Zvolený framework, který bude nainstalován společně s aplikací.
 
 ##### Název: **C#**
 ###### Verze: 9.0
-###### Krátký popis:
-Zvolený programovací jazyk.
+###### Krátký popis: Zvolený programovací jazyk.
 
 ##### Název: **Microsoft EntityFrameworkCore Sqlite**
 ###### Verze: 5.0.5
-###### Krátký popis:
-Zvolený databázový systém pro ukládání všech dat.
+###### Krátký popis: Zvolený databázový systém pro ukládání všech dat.
 
 ##### Název: **Newtonsoft.Json**
 ###### Verze: 13.0.1
-###### Krátký popis:
-Nástroj pro zpracování dat ve formátu JSON.
+###### Krátký popis: Nástroj pro zpracování dat ve formátu JSON.
 
 #### 3.1.3 Hardwarové Rozhraní
 Počítač by měl být schopen alespoň základní požadavky pro běh systému Windows 10 a být připojen k internetu.
