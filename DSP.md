@@ -94,15 +94,39 @@ Od uživatele se očekává základní znalost použití programů v Microsoft W
 Program poběží na počítači s operačním systémem Windows a připojením k Internetu přes síť TUL. Počítač bude mít nainstalován framework .NET 5, který bude dodán společně s programem. Databázi bude spravovat program sám a není k ní nutné instalovat žádný další software.
 
 ## 3. Specifikace Požadavků
-
 ### 3.1 Externí Rozhraní
+Tato sekce popisuje všechny vstupně výstupní požadavky programu.
 
 #### 3.1.1 Uživatelské Rozhraní
 
-#### 3.1.2 Hardwarové Rozhraní
+#### 3.1.2 Softwarové Rozhraní
+##### Název: **Microsoft Windows**
+###### Verze: 19H2 (18363) - 20H2 (19042)
+###### Krátký popis:
+Zvolený operační systém nutný pro běh programu.
 
-#### 3.1.3 Softwarové Rozhraní
+##### Název: **.NET 5**
+###### Verze: 5.0.5
+###### Krátký popis:
+Zvolený framework, který bude nainstalován společně s aplikací.
 
+##### Název: **C#**
+###### Verze: 9.0
+###### Krátký popis:
+Zvolený programovací jazyk.
+
+##### Název: **Microsoft EntityFrameworkCore Sqlite**
+###### Verze: 5.0.5
+###### Krátký popis:
+Zvolený databázový systém pro ukládání všech dat.
+
+##### Název: **Newtonsoft.Json**
+###### Verze: 13.0.1
+###### Krátký popis:
+Nástroj pro zpracování dat ve formátu JSON.
+
+#### 3.1.3 Hardwarové Rozhraní
+Počítač by měl být schopen alespoň základní požadavky pro běh systému Windows 10 a být připojen k internetu.
 ### 3.2 Funkční Požadavky
 
 ### 3.3 Detailní Doplňkové Požadavky
