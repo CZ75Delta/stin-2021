@@ -94,16 +94,16 @@ Program poběží na počítači s operačním systémem Windows 10 a připojen�
 Tato sekce popisuje všechny vstupně výstupní požadavky a řešení programu.
 
 #### 3.1.1 Uživatelské Rozhraní
-Uživatelské rozhraní bude řešeno pomocí WPF. V rozhraní bude možné přepínat mezi dvěma taby pomocí prvku TabControl. Ve spodní části okna bude ProgressBar aktualizace dat, tlačítko pro manuální aktualizaci dat a tetxtovou reprezentaci aktuálního stavu programu.
+Uživatelské rozhraní bude řešeno pomocí WPF. V rozhraní bude možné přepínat mezi dvěma taby pomocí prvku TabControl. Ve spodní části okna bude ProgressBar aktualizace dat, tlačítko pro manuální aktualizaci dat a tetxtovou reprezentaci aktuálního stavu programu. V pravém horním rohu bude umístěn prvek na vybrání dne, pro který se mají data zobrazovat.
 
 První tab bude zobrazovat porovnání dat o nakažených nemocí Covid-19 v ČR. Toho dosáhne ListBoxem, ve kterém bude možné zvolit, která data se mají zobrazit k porovnání v grafu nad ním.
-![Uživatelské rozhraní 1](https://i.imgur.com/DHCs1Od.png "Uživatelské rozhraní 1")
+![Uživatelské rozhraní 1](https://i.imgur.com/UkWErCk.png "Uživatelské rozhraní 1")
 
 Druhý tab zobrazuje porovnání ČR a až čtyř dalších zemí v grafu. Požadované země se dají zvolit v ListBoxu, ve kterém se dá vyhledávat pomocí vyhledávacího políčka nad ním.
-![Uživatelské rozhraní 2](https://i.imgur.com/KhyOE68.png "Uživatelské rozhraní 2")
+![Uživatelské rozhraní 2](https://i.imgur.com/lpkEzCT.png "Uživatelské rozhraní 2")
 
 #### 3.1.2 Softwarové Rozhraní
-Aplikace bude porovnávat datové sady uložené v SQLite databázi ve složce ze které je spuštěn program. Data v této aplikaci bude získávat ze dvou zdrojů. Aplikace bude posílat pravidelné "I'm alive" notifikace na webhook Telegram bota. Na stejný webhook bude také odesílat případné chyby běhu programu.
+Aplikace bude porovnávat datové sady uložené v SQLite databázi ve složce ze které je spuštěn program. Data v této aplikaci bude získávat ze dvou zdrojů. Aplikace bude posílat pravidelné "I'm alive" notifikace na webhook Telegram bota. Na stejný webhook bude také odesílat případné chyby běhu programu. Kontrola, zda jsou nová data pro aktualizaci bude probíhat vždy ve stanovený časový úsek v intervalech 5 minut.
 
 Zdroje dat:
 * ##### Název: **[MZČR Základní Přehled](https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json)**
@@ -159,8 +159,52 @@ Použité nástroje:
 Počítač by měl být splňovat alespoň základní požadavky pro běh systému Windows 10 a být připojen k internetu.
 
 ### 3.2 Funkční Požadavky
+| Případ použití  | Zobrazení dat |
+| --- | --- | 
+| Událost | Uživatel zvolí, která data chce zobrazit | 
+| Základní postup |     | 
+| Alternativní postup |     | 
+| Vyjímky |     | 
+| Další |     | 
+
+| Případ použití  | Aktualizace dat |
+| --- | --- | 
+| Událost | Uživatel stiskne tlačítko pro manuální aktualizaci dat | 
+| Základní postup |     | 
+| Alternativní postup |     | 
+| Vyjímky |     | 
+| Další |     | 
 
 ### 3.3 Detailní Doplňkové Požadavky
+![Schéma databáze](https://i.imgur.com/ZVhsaSZ.png "Schéma databáze")
+*Logické schéma dat*
+
+#### Tabulka zemí:
+| Datová položka | Typ | Popis |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
+#### Tabulka Očkování:
+| Datová položka | Typ | Popis |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
+#### Tabulka Nakažených:
+| Datová položka | Typ | Popis |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
 
 #### 3.3.1 Bezpečnost
 Uživatel má přístup pouze k zobrazování a aktualizace dat, není tedy možný z jeho strany útok na integritu dat. 
