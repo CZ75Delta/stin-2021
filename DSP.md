@@ -108,54 +108,54 @@ Druhý tab zobrazuje porovnání ČR a až čtyř dalších zemí v grafu. Poža
 Aplikace bude porovnávat datové sady uložené v SQLite databázi ve složce ze které je spuštěn program. Data v této aplikaci bude získávat ze dvou zdrojů. Aplikace bude logovat chyby a informace na Telegram. Logy bude odesílat po každé aktualizaci dat, či nastalé chybě. Kontrola, zda jsou nová data pro aktualizaci bude probíhat vždy ve stanovený časový úsek v intervalech 5 minut.
 
 Zdroje dat:
-* ##### Název: **[MZČR Základní Přehled](https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json)**
+* ##### **[MZČR Základní Přehled](https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json)**
   ###### Formát dat: JSON
   ![Schéma dat](https://i.imgur.com/iyTW6M1.png "Schéma dat")
   ###### Čas aktualizace: ~7:00 – 9:00 CET 
   ###### Krátký popis: Stručný náhled na základní epidemiologická data o pandemii COVID-19 v ČR. Datová sada obsahuje aktuální kumulativní počet provedených PCR a antigenních testů (včetně informace za předchozí den), potvrzené případy celkem a ve věkové skupině 65+(včetně informace za předchozí den), aktivní případy, vyléčené, úmrtí, očkování a hopitalizované pacienty.
   
-* ##### Název: **[MZČR Přehled vykázaných očkování podle krajů ČR](https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/ockovani.json)**
+* ##### **[MZČR Přehled vykázaných očkování podle krajů ČR](https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/ockovani.json)**
   ###### Formát dat: JSON
   ![Schéma dat](https://i.imgur.com/pzvLXsj.png "Schéma dat")
   ###### Čas aktualizace: ~7:00 – 9:00 CET 
   ###### Krátký popis: Datová sada poskytuje agregovaná data o vykázaných očkováních na úrovni krajů ČR. Každý řádek přehledu popisuje počet vykázaných očkování v daném dni, za věkovou skupinu, s použitím vybrané očkovací látky a ve vybraném kraji. Za jeden den tedy přehled obsahuje maximálně X řádků, kde X = počet krajů (14) x počet věkových skupin (15) x počet druhů očkovacích látek (v okamžik publikace 2) = 630. Data jsou aktualizována k času 20.00 h předchozího dne a mohou se zpětně mírně měnit z důvodu průběžného doplňování.
 
-* ##### Název: **[WHO Denní Přehled Nakažených a Mrtvých](https://covid19.who.int/WHO-COVID-19-global-data.csv)**
+* ##### **[WHO Denní Přehled Nakažených a Mrtvých](https://covid19.who.int/WHO-COVID-19-global-data.csv)**
   ###### Formát dat: CSV
   ![Schéma dat](https://i.imgur.com/pVPPC6V.png "Schéma dat")
   ###### Čas aktualizace: ~0:00 – 2:00 CET 
-  ###### Krátký popis: Datová sada o připadech Covid-19 nahlášených WHO.
+  ###### Datová sada o připadech Covid-19 nahlášených WHO.
 
-* ##### Název: **[WHO Data o Vakcínách](https://covid19.who.int/who-data/vaccination-data.csv)**
+* ##### **[WHO Data o Vakcínách](https://covid19.who.int/who-data/vaccination-data.csv)**
   ###### Formát dat: CSV
   ![Schéma dat](https://i.imgur.com/frf38zN.png "Schéma dat")
   ###### Čas aktualizace: ~0:00 – 2:00 CET 
-  ###### Krátký popis: Datová sada o vakcinaci proti Covid-19 od WHO.
+  ###### Datová sada o vakcinaci proti Covid-19 od WHO.
 
-Použité nástroje:
-* ##### Název: **Microsoft Windows**
+Použité nástroje a software:
+* ##### **Microsoft Windows**
   ###### Verze: 19H2 (18363) - 20H2 (19042)
-  ###### Krátký popis: Zvolený operační systém nutný pro běh programu.
+  ###### Zvolený operační systém nutný pro běh programu.
 
-* ##### Název: **.NET 5**
+* ##### **.NET 5**
   ###### Verze: 5.0.5
-  ###### Krátký popis: Zvolený framework, který bude nainstalován společně s aplikací.
+  ###### Zvolený framework, který bude nainstalován společně s aplikací.
 
-* ##### Název: **C#**
+* ##### **C#**
   ###### Verze: 9.0
-  ###### Krátký popis: Zvolený programovací jazyk.
+  ###### Zvolený programovací jazyk.
 
-* ##### Název: **[Microsoft.EntityFrameworkCore.Sqlite](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Sqlite/)**
+* ##### **[Microsoft.EntityFrameworkCore.Sqlite](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Sqlite/)**
   ###### Verze: 5.0.5
-  ###### Krátký popis: Zvolený databázový systém a ORM pro ukládání dat.
+  ###### Zvolený databázový systém a ORM pro ukládání dat.
 
-* ##### Název: **[Newtonsoft.Json](https://www.nuget.org/packages/Newtonsoft.Json/)**
+* ##### **[Newtonsoft.Json](https://www.nuget.org/packages/Newtonsoft.Json/)**
   ###### Verze: 13.0.1
-  ###### Krátký popis: Nástroj pro zpracování dat ve formátu JSON.
+  ###### Nástroj pro zpracování dat ve formátu JSON.
  
-* ##### Název: **[LiveCharts](https://github.com/beto-rodriguez/LiveCharts2)**
+* ##### **[LiveCharts](https://github.com/beto-rodriguez/LiveCharts2)**
   ###### Verze: 2
-  ###### Krátký popis: Nástroj pro zpracování dat ve formátu JSON.
+  ###### Nástroj pro zpracování dat ve formátu JSON.
 
 #### 3.1.3 Hardwarové Požadavky
 Počítač by měl být splňovat alespoň základní požadavky pro běh systému Windows 10 a být připojen k internetu.
