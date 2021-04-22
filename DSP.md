@@ -1,7 +1,7 @@
 # Dokument Specifikace Požadavků
 ## Covid-19 Tracker - Škrbel, Novotný, Schönherr, Vican
 
-- Verze 0.4.6 Beta (pfft) 
+- Verze 1.0
 - Připravil Vít Škrbel
 - FM TUL
 - 20\. 4\. 2021
@@ -164,49 +164,17 @@ Počítač by měl být splňovat alespoň základní požadavky pro běh systé
 | Případ použití  | Zobrazení dat |
 | --- | --- | 
 | Událost | Uživatel zvolí, která data chce zobrazit | 
-| Základní postup |     | 
-| Alternativní postup |     | 
-| Vyjímky |     | 
-| Další |     | 
+| Základní postup | 1. Uživatel zvolí jeden z tabů 2. Aplikace vyhledá data pro daný tab v databázi a vykreslí je 3. Uživatel zvolí data, která chce porovnat v grafu 4. Aplikace vyhledá data a vykreslí je do grafu | 
+| Alternativní postup | Pokud v 1. kroku aplikace nenajde v databázi vhodná data, načte do ní nová data ze zdrojů | 
 
 | Případ použití  | Aktualizace dat |
 | --- | --- | 
 | Událost | Uživatel stiskne tlačítko pro manuální aktualizaci dat | 
-| Základní postup |     | 
-| Alternativní postup |     | 
-| Vyjímky |     | 
-| Další |     | 
+| Základní postup | 1. Uživatel stiskne tlačítko manuální aktualizace 2. Aplikace stáhne data ze zdojů a porovná je s daty v databázi 3a. Pokud jsou data novější, aplikace zpracuje data a přidá je do databáze 3b. Pokud novější data nejsou k dispozici aplikace nic neudělá a pokračuje dále v činnosti | 
 
 ### 3.3 Detailní Doplňkové Požadavky
 ![Schéma databáze](https://i.imgur.com/ZVhsaSZ.png "Schéma databáze")
 *Logické schéma dat*
-
-#### Tabulka zemí:
-| Datová položka | Typ | Popis |
-| --- | --- | --- |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-
-#### Tabulka Očkování:
-| Datová položka | Typ | Popis |
-| --- | --- | --- |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-
-#### Tabulka Nakažených:
-| Datová položka | Typ | Popis |
-| --- | --- | --- |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
 
 #### 3.3.1 Bezpečnost
 Uživatel má přístup pouze k zobrazování a aktualizace dat, není tedy možný z jeho strany útok na integritu dat. 
