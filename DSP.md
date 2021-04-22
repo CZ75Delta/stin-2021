@@ -17,7 +17,7 @@ Obsah
 * 2 [Celkový popis](#2-celkový-popis)
   * 2.1 [Prostředí Programu](#21-prostředí-programu)
   * 2.2 [Funkční Požadavky](#22-funkční-požadavky)
-  * 2.3 [Charekteristiky Uživatelů](#23-charekteristiky-uživatelů)
+  * 2.3 [Charakteristiky Uživatelů](#23-charakteristiky-uživatelů)
   * 2.4 [Doplňkové Požadavky](#24-doplňkové-požadavky)
 * 3 [Specifikace Požadavků](#3-specifikace-požadavků)
   * 3.1 [Externí Rozhraní](#31-externí-rozhraní)
@@ -42,7 +42,7 @@ Program bude sloužit ke sledování vybraných informací o nemoci Covid-19. Bu
 ### 1.3 Glosář
 | Pojem | Definice |
 | --- | ---|
-| Dokument specifikace požadavků | Dokument popisující věechny funkce navrženého programu a omezení ve kterých musí pracovat. Například tento dokument | 
+| Dokument specifikace požadavků | Dokument popisující všechny funkce navrženého programu a omezení ve kterých musí pracovat. Například tento dokument | 
 | Covid-19 | Covid-19 z anglického spojení coronavirus disease 2019 je vysoce infekční onemocnění, které je způsobeno koronavirem SARS-CoV-2. První případ byl identifikován v čínském Wu-chanu v prosinci 2019. Od té doby se virus rozšířil po celém světě, což způsobilo přetrvávající pandemii.  |
 
 ### 1.4 Zdroje
@@ -81,11 +81,11 @@ Uživatel se rozhodne provést manuální aktualizaci dat.
 ##### Popis kroků:
 1. Uživatel stiskne tlačítko aktualizace dat.
 2. Program zkontroluje zda je k dispozici aktualizace.
-2a. Pokud existuje aktualizace program provede aktuazlizaci zobrazení
-2b. Pokud neexistuje aktualizace program upozorní uživatele.
+  * Pokud existuje aktualizace program provede aktuazlizaci zobrazení
+  * Pokud neexistuje aktualizace program upozorní uživatele.
 ##### Reference:
 
-### 2.3 Charekteristiky Uživatelů
+### 2.3 Charakteristiky Uživatelů
 Od uživatele se očekává základní znalost použití programů v Microsoft Windows. Dále se také očekává znalost čtení grafů a použítí ovládacích prvků jako jsou tlačítka, rozbalovací nabídky apod.
 
 ### 2.4 Doplňkové Požadavky
