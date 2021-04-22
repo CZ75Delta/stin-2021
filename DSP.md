@@ -158,7 +158,7 @@ Použité nástroje a software:
   ###### Nástroj pro zpracování dat ve formátu JSON.
 
 #### 3.1.3 Hardwarové Požadavky
-Počítač by měl být splňovat alespoň základní požadavky pro běh systému Windows 10 a být připojen k internetu.
+Počítač by měl být splňovat alespoň **[základní požadavky pro běh systému Windows 10](https://support.microsoft.com/cs-cz/windows/po%C5%BEadavky-na-syst%C3%A9m-windows-10-6d4e9a79-66bf-7950-467c-795cf0386715)** a být připojen k internetu.
 
 ### 3.2 Funkční Požadavky
 | Případ použití  | Zobrazení dat |
