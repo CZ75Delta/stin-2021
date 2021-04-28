@@ -19,6 +19,10 @@ namespace Covid_19_Tracker.ViewModel
         #region Command Methods
 
         #endregion
+        
+        public MainViewModel()
+        {
+        }
 
         public new void OnPropertyChanged(string propertyName) { base.OnPropertyChanged(propertyName); }
     }

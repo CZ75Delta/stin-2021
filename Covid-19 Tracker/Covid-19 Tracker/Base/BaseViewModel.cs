@@ -6,7 +6,7 @@ namespace Covid_19_Tracker.Base
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public void OnPropertyChanged(string propertyName)
+        protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
