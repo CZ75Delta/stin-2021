@@ -67,10 +67,10 @@ Tato sekce blíže popisuje jednotlivé případy použití programu.
 ##### Krátký popis:
 Uživatel si zvolí která data chce zobrazit a upraví parametry zobrazení.
 ##### Popis kroků:
-1. Uživatel si volí která data chce zobrazit.
-2. Program zobrazí požadovaná data.
-3. Uživatel upraví parametry zobrazení.
-4. Program upraví zobrazení podle parametrů.
+- Uživatel si volí která data chce zobrazit.
+- Program zobrazí požadovaná data.
+- Uživatel upraví parametry zobrazení.
+- Program upraví zobrazení podle parametrů.
 ##### Reference:
 
 #### 2.2.2 Případ použití: **Aktualizace dat**
@@ -79,10 +79,10 @@ Uživatel si zvolí která data chce zobrazit a upraví parametry zobrazení.
 ##### Krátký popis:
 Uživatel se rozhodne provést manuální aktualizaci dat.
 ##### Popis kroků:
-1. Uživatel stiskne tlačítko aktualizace dat.
-2. Program zkontroluje zda je k dispozici aktualizace.
-  * Pokud existuje aktualizace program provede aktuazlizaci zobrazení
-  * Pokud neexistuje aktualizace program upozorní uživatele.
+- Uživatel stiskne tlačítko aktualizace dat.
+- Program zkontroluje zda je k dispozici aktualizace.
+  - Pokud existuje aktualizace program provede aktuazlizaci zobrazení
+  - Pokud neexistuje aktualizace program upozorní uživatele.
 ##### Reference:
 
 ### 2.3 Charakteristiky Uživatelů
@@ -98,14 +98,14 @@ Tato sekce popisuje všechny vstupně výstupní požadavky a řešení programu
 #### 3.1.1 Uživatelské Rozhraní
 Uživatelské rozhraní bude řešeno pomocí WPF. V rozhraní bude možné přepínat mezi dvěma taby pomocí prvku TabControl. Ve spodní části okna bude ProgressBar aktualizace dat, tlačítko pro manuální aktualizaci dat a tetxtovou reprezentaci aktuálního stavu programu. V pravém horním rohu bude umístěn prvek na vybrání dne, pro který se mají data zobrazovat.
 
-První tab bude zobrazovat porovnání dat o nakažených nemocí Covid-19 v ČR. Toho dosáhne ListBoxem, ve kterém bude možné zvolit, která data se mají zobrazit k porovnání v grafu nad ním.
+První tab bude zobrazovat porovnání dat o nakažených nemocí Covid-19 v ČR. Toho dosáhne ListBoxem, ve kterém bude možné zvolit, která data se mají zobrazit k porovnání v grafu nad ním. Může se tedy zobrazit buď graf celkového počtu nakažených, či nově nakažených. Data která se budou zobrazovat v grafu nebudou záležet na vybraném datumu, zobrazí se celé období dat v databázi.
 ![Uživatelské rozhraní 1](https://i.imgur.com/UkWErCk.png "Uživatelské rozhraní 1")
 
 Druhý tab zobrazuje porovnání ČR a až čtyř dalších zemí v grafu. Požadované země se dají zvolit v ListBoxu, ve kterém se dá vyhledávat pomocí vyhledávacího políčka nad ním.
 ![Uživatelské rozhraní 2](https://i.imgur.com/lpkEzCT.png "Uživatelské rozhraní 2")
 
 #### 3.1.2 Softwarové Rozhraní
-Aplikace bude porovnávat datové sady uložené v SQLite databázi ve složce ze které je spuštěn program. Data v této aplikaci bude získávat ze dvou zdrojů. Aplikace bude logovat chyby a informace na Telegram. Logy bude odesílat po každé aktualizaci dat, či nastalé chybě. Kontrola, zda jsou nová data pro aktualizaci bude probíhat vždy ve stanovený časový úsek v intervalech 5 minut.
+Aplikace bude porovnávat datové sady uložené v SQLite databázi ve složce ze které je spuštěn program. Data v této aplikaci bude získávat ze dvou zdrojů. Aplikace bude logovat chyby a informace na **[webhook Telegram bota](https://core.telegram.org/bots/api)**. Logy bude odesílat po každé aktualizaci dat, či nastalé chybě. Kontrola, zda jsou nová data pro aktualizaci bude probíhat vždy ve stanovený časový úsek v intervalech 5 minut. Identické logy se budou ukládat také do lokálního souboru ve složce aplikace v případě výpadku internetového připojení. Po obnovení připojení se odešle celý logovací soubor.
 
 Zdroje dat:
 * ##### **[MZČR Základní Přehled](https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json)**
@@ -184,10 +184,10 @@ Přístup k datovým serverům je zařízen pomocí HTTPS dotazů. Pokud server 
 Aplikace musí běžet alespoň týden bez vnějšího podnětu, automaticky aktualizovat data a ta následně zobrazovat.
 
 #### 3.3.3 Dostupnost
-Aplikace musí být neustále dostupná, i v případě výpadku internetového připojení. Pokud nemůže aplikace data stáhnout musí být stále schopna zobrazovat již stažená data.
+Aplikace musí být neustále dostupná, i v případě výpadku internetového připojení. Pokud nemůže aplikace data stáhnout musí být stále schopna zobrazovat již stažená data. Aplikace nebude připojení kontrolovat neustále, ale až poté co po manuální či automatické aktualizaci zjistí, že nemá připojení k internetu. Tato kontrola bude probíhat každých 10 minut pomocí **[této metody.](https://stackoverflow.com/a/44025507)** Po získání připojení k internetu aplikace provede aktualizaci mimo dané termíny.
 
 #### 3.3.4 Časová náročnost
-Odhad doby tvorby aplikace je zhruba 2 týdny.
+Odhad doby tvorby aplikace je zhruba 120 hodin.
 
 #### 3.3.5 Uzávěrka
 Týden před zkouškou :D
