@@ -14,6 +14,9 @@ namespace Covid_19_Tracker.ViewModel
 
         private readonly ProcessData _processData;
         private Dictionary<string, string> dictMzcr;
+        private Dictionary<string, string> dictWho;
+        private List<Dictionary<string, string>> listWho;
+
 
         #endregion
 
@@ -33,12 +36,17 @@ namespace Covid_19_Tracker.ViewModel
 
         public void UpdateData()
         {
+            //MZČR
             ProgressText = _apiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json");
 
             dictMzcr = new Dictionary<string, string>();
-
             dictMzcr =_processData.JSONToDictMZCR(ProgressText);
 
+            //WHO ČR
+            string textWhoCr = _apiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv");
+
+            dictWho = new Dictionary<string, string>();
+            dictWho = _processData.CSVToDictWHOCR(textWhoCr);
         }
 
         #endregion
