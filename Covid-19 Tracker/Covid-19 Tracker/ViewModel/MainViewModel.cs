@@ -11,6 +11,8 @@ namespace Covid_19_Tracker.ViewModel
         private readonly ApiHandler _apiHandler;
         private string _progressText;
 
+        private readonly ProcessData _processData;
+
         #endregion
 
         #region Bindable Properties
@@ -30,6 +32,8 @@ namespace Covid_19_Tracker.ViewModel
         public void UpdateData()
         {
             ProgressText = _apiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json");
+
+            _processData.JSONToDictMZCR(ProgressText);
         }
 
         #endregion
@@ -37,6 +41,7 @@ namespace Covid_19_Tracker.ViewModel
         public MainViewModel()
         {
             _apiHandler = new ApiHandler();
+            _processData = new ProcessData();
             RefreshCommand = new Command(UpdateData);
         }
 
