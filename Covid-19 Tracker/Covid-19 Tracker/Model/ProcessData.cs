@@ -19,16 +19,16 @@ namespace Covid_19_Tracker.Model
         public Dictionary<string, string> JSONToDictMZCR(string json)
         {
             var value = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(json);
-            Dictionary<string, string> dict = new Dictionary<string, string>();
-
-            dict.Add("Date", value["modified"].Date.AddDays(-1).ToString("yyyy-MM-dd"));
-            dict.Add("Source", "mzcr");
-            dict.Add("Country", "Czechia");
-            dict.Add("TotalCases", value["data"][0]["potvrzene_pripady_celkem"].ToString());
-            dict.Add("NewCases", value["data"][0]["potvrzene_pripady_vcerejsi_den"].ToString());
-            dict.Add("TotalVaccinations", value["data"][0]["vykazana_ockovani_celkem"].ToString());
-            dict.Add("NewVaccinations", value["data"][0]["vykazana_ockovani_vcerejsi_den"].ToString());
-
+            var dict = new Dictionary<string, string>
+            {
+                { "Date", value?["modified"].Date.AddDays(-1).ToString("yyyy-MM-dd") },
+                { "Source", "mzcr" },
+                { "Country", "Czechia" },
+                { "TotalCases", value["data"][0]["potvrzene_pripady_celkem"].ToString() },
+                { "NewCases", value["data"][0]["potvrzene_pripady_vcerejsi_den"].ToString() },
+                { "TotalVaccinations", value["data"][0]["vykazana_ockovani_celkem"].ToString() },
+                { "NewVaccinations", value["data"][0]["vykazana_ockovani_vcerejsi_den"].ToString() }
+            };
             return dict;
         }
 
@@ -41,29 +41,26 @@ namespace Covid_19_Tracker.Model
         /// </returns>
         public Dictionary<string, string> CSVToDictWHOCR(string csv)
         {
-            Dictionary<string, string> dict = new Dictionary<string, string>();
-
-            string[] lines = csv.Split('\n');
-            string dateYesterday = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
-            foreach (string line in lines)
+            var lines = csv.Split('\n');
+            var dateYesterday = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
+            foreach (var line in lines)
             {
-                if (line.StartsWith(dateYesterday))
+                if (!line.StartsWith(dateYesterday)) continue;
+                if (!line.Contains("CZ")) continue;
+                var data = line.Split(',');
+                var dict = new Dictionary<string, string>
                 {
-                    if (line.Contains("CZ"))
-                    {
-                        string[] data = line.Split(',');
-                        dict.Add("Date", dateYesterday);
-                        dict.Add("Source", "who");
-                        dict.Add("Country", "Czechia");
-                        dict.Add("TotalCases", data[5]);
-                        dict.Add("NewCases", data[4]);
-                        break;
-                    }
-                }
+                    {"Date", dateYesterday},
+                    {"Source", "who"},
+                    {"Country", "Czechia"},
+                    {"TotalCases", data[5]},
+                    {"NewCases", data[4]}
+                };
+                return dict;
             }
-            
-            return dict;
+            return null;
         }
+
         /// <summary>
         /// Metoda vybrání dat z WHO Země
         /// </summary>
@@ -74,25 +71,18 @@ namespace Covid_19_Tracker.Model
         /// </returns>
         public List<Dictionary<string, string>> CSVToListWHOCountries(string csv)
         {
-            List<Dictionary<string, string>> list = new List<Dictionary<string, string>>();
-            Dictionary<string, string> dict;
-            string[] lines = csv.Split("\r\n");
-
-            for (int i = 1; i < lines.Length - 1; i++)
+            var list = new List<Dictionary<string, string>>();
+            var lines = csv.Split("\r\n");
+            for (var i = 1; i < lines.Length - 1; i++)
             {
-                string[] data = lines[i].Split(',');
-                dict = new Dictionary<string, string>();
-
-                dict.Add("Date", data[4]);
-                dict.Add("Source", "who");
-                dict.Add("Country", data[0]);
-
-                if (data[6].ToString().Equals(""))
+                var data = lines[i].Split(',');
+                var dict = new Dictionary<string, string>
                 {
-                    dict.Add("TotalVaccinations", "0");
-                }
-                else { dict.Add("TotalVaccinations", data[6]); }
-
+                    {"Date", data[4]},
+                    {"Source", "who"},
+                    {"Country", data[0]},
+                    {"TotalVaccinations", data[6].Equals("") ? "0" : data[6]}
+                };
                 list.Add(dict);
             }
             return list;

@@ -11,15 +11,14 @@ namespace Covid_19_Tracker.ViewModel
         #region Global Variables
 
         private readonly ApiHandler _apiHandler;
+        private readonly ProcessData _processData;
+
         private string _progressText;
         private int _progressBar;
 
-        private readonly ProcessData _processData;
         private Dictionary<string, string> dictMzcr;
         private Dictionary<string, string> dictWho;
-
         private List<Dictionary<string, string>> listWho;
-
 
         #endregion
 
@@ -70,7 +69,6 @@ namespace Covid_19_Tracker.ViewModel
 
         public MainViewModel()
         {
-
             _apiHandler = new ApiHandler();
             _processData = new ProcessData();
             RefreshCommand = new Command(UpdateData);
