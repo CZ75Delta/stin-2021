@@ -63,7 +63,9 @@ namespace Covid_19_Tracker.ViewModel
             listWho = new List<Dictionary<string, string>>();
             listWho = _processData.CSVToListWHOCountries(textWhoCountries);
             ProgressBar = 50;
-
+            
+            // TODO - tady někde po updatu dat zavolat update populací všech zemí
+            
             string test = _apiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv");
         }
 
