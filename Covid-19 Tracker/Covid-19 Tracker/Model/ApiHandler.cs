@@ -21,38 +21,16 @@ namespace Covid_19_Tracker.Model
                     var content = new StreamReader(stream, Encoding.UTF8).ReadToEnd();
                     return content;
                 }
-
-                return "";
+                else
+                {
+                    var content =  new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
+                    return content;
+                }
             }
             catch (Exception)
             {
                 return string.Empty;
             }
-        }
-
-
-        /// <summary>
-        /// Upravit toto aby zvládnula načíst nějak normálně toto
-        /// https://covid19.who.int/who-data/vaccination-data.csv
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        public string DownloadCSVFromUrl(string url)
-        {
-            try
-            {
-                HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
-                HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
-                
-                Stream stream = new GZipStream(resp.GetResponseStream(), CompressionMode.Decompress);
-                string content = new StreamReader(stream, Encoding.UTF8).ReadToEnd();
-                return content;
-            }
-            catch (Exception)
-            {
-                return string.Empty;
-            }
-            
         }
     }
 }
