@@ -1,4 +1,5 @@
-﻿using Covid_19_Tracker.Base;
+﻿using System.Runtime.CompilerServices;
+using Covid_19_Tracker.Base;
 using Covid_19_Tracker.Model;
 
 namespace Covid_19_Tracker.ViewModel
@@ -14,7 +15,7 @@ namespace Covid_19_Tracker.ViewModel
 
         #region Bindable Properties
 
-        public string ProgressText { get => _progressText; private set { _progressText = value; OnPropertyChanged(ProgressText); } }
+        public string ProgressText { get => _progressText; private set { _progressText = value; OnPropertyChanged(); } }
 
         #endregion
 
@@ -39,6 +40,6 @@ namespace Covid_19_Tracker.ViewModel
             RefreshCommand = new Command(UpdateData);
         }
 
-        public new void OnPropertyChanged(string propertyName) { base.OnPropertyChanged(propertyName); }
+        public new void OnPropertyChanged([CallerMemberName] string propertyName = "") { base.OnPropertyChanged(propertyName); }
     }
 }

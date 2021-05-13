@@ -18,7 +18,9 @@
         </Grid.RowDefinitions>
         <TabControl Grid.Row="0" Grid.Column="0" Grid.RowSpan="2">
             <TabItem Header="Nakažení v ČR">
-                <Grid Background="#FFE5E5E5"/>
+                <Grid Background="#FFE5E5E5">
+                    <TextBlock Text="{Binding ProgressText, Mode=OneWay}"/>
+                </Grid>
             </TabItem>
             <TabItem Header="Proočkovanost ve světě">
                 <Grid Background="#FFE5E5E5"/>
@@ -45,7 +47,7 @@
                 </StatusBarItem>
                 <Separator Grid.Column="1" />
                 <StatusBarItem Grid.Column="2">
-                    <TextBlock Text="{Binding ProgressText}" />
+                    <TextBlock Text="{Binding ProgressText, Mode=OneWay}" />
                 </StatusBarItem>
                 <Separator Grid.Column="3" />
                 <StatusBarItem Grid.Column="4">
