@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Covid_19_Tracker.Model
@@ -67,7 +68,7 @@ namespace Covid_19_Tracker.Model
         /// <param name="csv"></param>
         /// <returns>list zemí
         /// dictionary
-        /// keys - Date, Source, Country, TotalVaccinations
+        /// keys - Date, Source, Country, IsoCode,TotalVaccinations
         /// </returns>
         public List<Dictionary<string, string>> CSVToListWHOCountries(string csv)
         {
@@ -75,12 +76,16 @@ namespace Covid_19_Tracker.Model
             var lines = csv.Split("\r\n");
             for (var i = 1; i < lines.Length - 1; i++)
             {
-                var data = lines[i].Split(',');
+                Regex regx = new Regex(',' + "(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+                var data = regx.Split(lines[i]);
+
+                //var data = lines[i].Split(',');
                 var dict = new Dictionary<string, string>
                 {
                     {"Date", data[4]},
                     {"Source", "who"},
-                    {"Country", data[0]},
+                    {"Country", data[0].Trim('\"')},
+                    {"IsoCode", data[1]},
                     {"TotalVaccinations", data[6].Equals("") ? data[5].Equals("") ? "0" : (int.Parse(data[5])/2).ToString() : data[6]}
                 };
                 list.Add(dict);
