@@ -45,7 +45,6 @@ namespace Covid_19_Tracker.ViewModel
 
             //WHO ČR
             string textWhoCr = _apiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv");
-
             dictWho = new Dictionary<string, string>();
             dictWho = _processData.CSVToDictWHOCR(textWhoCr);
 
