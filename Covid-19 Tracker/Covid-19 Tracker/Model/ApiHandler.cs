@@ -3,7 +3,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Text;
-using Microsoft.VisualBasic.FileIO;
 
 namespace Covid_19_Tracker.Model
 {
