@@ -49,8 +49,6 @@ namespace Covid_19_Tracker.ViewModel
             dictWho = new Dictionary<string, string>();
             dictWho = _processData.CSVToDictWHOCR(textWhoCr);
 
-            /////////////////////////////////Nefunguje
-            ///POTVRZUJI
             //WHO Countries
             string textWhoCountries = _apiHandler.DownloadCSVFromUrl("https://covid19.who.int/who-data/vaccination-data.csv");
             listWho = new List<Dictionary<string, string>>();

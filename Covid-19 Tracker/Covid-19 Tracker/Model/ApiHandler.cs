@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Net;
 using System.Text;
 using Microsoft.VisualBasic.FileIO;
@@ -35,18 +36,16 @@ namespace Covid_19_Tracker.Model
             {
                 HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
                 HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
-
-
-                StreamReader sr = new StreamReader(resp.GetResponseStream(),Encoding.Default, false);
-                string results = sr.ReadToEnd();
-                sr.Close();
-
-                return results;
+                
+                Stream stream = new GZipStream(resp.GetResponseStream(), CompressionMode.Decompress);
+                string content = new StreamReader(stream, Encoding.UTF8).ReadToEnd();
+                return content;
             }
             catch (Exception)
             {
                 return string.Empty;
             }
+            
         }
     }
 }
