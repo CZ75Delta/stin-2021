@@ -70,6 +70,7 @@ namespace Covid_19_Tracker.ViewModel
 
         public MainViewModel()
         {
+
             _apiHandler = new ApiHandler();
             _processData = new ProcessData();
             RefreshCommand = new Command(UpdateData);

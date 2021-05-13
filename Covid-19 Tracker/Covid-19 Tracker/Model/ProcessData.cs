@@ -83,7 +83,7 @@ namespace Covid_19_Tracker.Model
                 string[] data = lines[i].Split(',');
                 dict = new Dictionary<string, string>();
 
-                dict.Add("Date", data[3]);
+                dict.Add("Date", data[4]);
                 dict.Add("Source", "who");
                 dict.Add("Country", data[0]);
 
