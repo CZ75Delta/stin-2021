@@ -15,6 +15,7 @@ namespace Covid_19_Tracker.ViewModel
         private readonly ProcessData _processData;
         private Dictionary<string, string> dictMzcr;
         private Dictionary<string, string> dictWho;
+
         private List<Dictionary<string, string>> listWho;
 
 
@@ -47,10 +48,17 @@ namespace Covid_19_Tracker.ViewModel
 
             dictWho = new Dictionary<string, string>();
             dictWho = _processData.CSVToDictWHOCR(textWhoCr);
+
+            /////////////////////////////////Nefunguje
+            //WHO Countries
+            string textWhoCountries = _apiHandler.DownloadCSVFromUrl("https://covid19.who.int/who-data/vaccination-data.csv");
+            listWho = new List<Dictionary<string, string>>();
+            listWho = _processData.CSVToListWHOCountries(textWhoCountries);
+
         }
 
         #endregion
-        
+
         public MainViewModel()
         {
             _apiHandler = new ApiHandler();
