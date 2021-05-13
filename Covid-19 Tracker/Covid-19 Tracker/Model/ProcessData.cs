@@ -81,7 +81,7 @@ namespace Covid_19_Tracker.Model
                     {"Date", data[4]},
                     {"Source", "who"},
                     {"Country", data[0]},
-                    {"TotalVaccinations", data[6].Equals("") ? "0" : data[6]}
+                    {"TotalVaccinations", data[6].Equals("") ? data[5].Equals("") ? "0" : (int.Parse(data[5])/2).ToString() : data[6]}
                 };
                 list.Add(dict);
             }
