@@ -15,7 +15,7 @@ namespace Covid_19_Tracker.Model
             //Date, Source, Country, TotalCases (aktuální počet nakažených), NewCases, TotalVaccinations, NewVaccinations
             Dictionary<string, string> dict = new Dictionary<string, string>();
 
-            dict.Add("Date", value["modified"].Date.ToString("dd/MM/yyyy"));
+            dict.Add("Date", value["modified"].Date.ToString());
             dict.Add("Source", "mzcr");
             dict.Add("Country", "cze");
             dict.Add("TotalCases", value["data"][0]["aktivni_pripady"].ToString());

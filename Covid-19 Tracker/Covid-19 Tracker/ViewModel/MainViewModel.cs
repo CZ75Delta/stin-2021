@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Covid_19_Tracker.Base;
 using Covid_19_Tracker.Model;
 
@@ -12,6 +13,7 @@ namespace Covid_19_Tracker.ViewModel
         private string _progressText;
 
         private readonly ProcessData _processData;
+        private Dictionary<string, string> dictMzcr;
 
         #endregion
 
@@ -33,7 +35,10 @@ namespace Covid_19_Tracker.ViewModel
         {
             ProgressText = _apiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json");
 
-            _processData.JSONToDictMZCR(ProgressText);
+            dictMzcr = new Dictionary<string, string>();
+
+            dictMzcr =_processData.JSONToDictMZCR(ProgressText);
+
         }
 
         #endregion
