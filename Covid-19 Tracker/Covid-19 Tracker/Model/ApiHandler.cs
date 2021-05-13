@@ -10,11 +10,19 @@ namespace Covid_19_Tracker.Model
     {
         public string DownloadFromUrl(string url)
         {
-            using var webClient = new WebClient();
             try
             {
-                var data = webClient.DownloadString(url);
-                return data;
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                var response = (HttpWebResponse)request.GetResponse();
+
+                if ("gzip".Equals(response.ContentEncoding))
+                {
+                    Stream stream = new GZipStream(response.GetResponseStream(), CompressionMode.Decompress);
+                    var content = new StreamReader(stream, Encoding.UTF8).ReadToEnd();
+                    return content;
+                }
+
+                return "";
             }
             catch (Exception)
             {

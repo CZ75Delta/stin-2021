@@ -53,6 +53,7 @@ namespace Covid_19_Tracker.ViewModel
             listWho = new List<Dictionary<string, string>>();
             listWho = _processData.CSVToListWHOCountries(textWhoCountries);
 
+            string test = _apiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv");
         }
 
         #endregion
