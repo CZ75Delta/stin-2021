@@ -4,24 +4,20 @@ using Newtonsoft.Json;
 
 namespace Covid_19_Tracker.Model
 {
-    public class HttpRequest
+    public class ApiHandler
     {
-        public string Data { get; }
-
-        private HttpRequest(string url)
+        public string DownloadFromUrl(string url)
         {
             using var webClient = new WebClient();
-            Data = string.Empty;
             try
             {
-                Data = webClient.DownloadString(url);
+                var data = webClient.DownloadString(url);
+                return data;
             }
             catch (Exception)
             {
-                // ignored
+                return string.Empty;
             }
-
-            
         }
     }
 }

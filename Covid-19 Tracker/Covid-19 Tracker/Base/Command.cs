@@ -3,7 +3,7 @@ using System.Windows.Input;
 
 namespace Covid_19_Tracker.Base
 {
-    class Command : ICommand
+    public class Command : ICommand
     {
         private readonly Action _execute;
 
