@@ -16,6 +16,7 @@ namespace Covid_19_Tracker.ViewModel
         private readonly ProcessData _processData;
         private Dictionary<string, string> dictMzcr;
         private Dictionary<string, string> dictWho;
+        private DataToDb _dataToDb;
 
         private List<Dictionary<string, string>> listWho;
 
@@ -38,6 +39,8 @@ namespace Covid_19_Tracker.ViewModel
 
         #region Command Methods
 
+        // TODO - kontrola internetového připojení
+        // TODO - podle kontroly připojení internetu omezit použití aktualizace nebo vypsat varovnou zprávu
         public void UpdateData()
         {
             ProgressBar = 1;
@@ -47,6 +50,7 @@ namespace Covid_19_Tracker.ViewModel
 
             dictMzcr = new Dictionary<string, string>();
             dictMzcr =_processData.JSONToDictMZCR(ProgressText);
+            _dataToDb.DictToDb(dictMzcr);
             ProgressBar = 16;
 
             //WHO ČR
@@ -54,6 +58,7 @@ namespace Covid_19_Tracker.ViewModel
             ProgressBar = 24;
             dictWho = new Dictionary<string, string>();
             dictWho = _processData.CSVToDictWHOCR(textWhoCr);
+            _dataToDb.DictToDb(dictWho);
             ProgressBar = 32;
 
             //WHO Countries
@@ -62,11 +67,13 @@ namespace Covid_19_Tracker.ViewModel
 
             listWho = new List<Dictionary<string, string>>();
             listWho = _processData.CSVToListWHOCountries(textWhoCountries);
+            foreach (var dict in listWho)
+            {
+                _dataToDb.DictToDb(dict);
+            }
             ProgressBar = 50;
             
-            // TODO - tady někde po updatu dat zavolat update populací všech zemí
-            
-            string test = _apiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv");
+            _dataToDb.UpdatePopulation();
         }
 
         #endregion

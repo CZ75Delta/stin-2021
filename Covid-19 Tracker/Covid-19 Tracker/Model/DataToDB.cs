@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -8,47 +9,66 @@ namespace Covid_19_Tracker.Model
     public class DataToDb
     {
         /// <summary>
-        /// Metoda pro zpracování dat do objektů databáze a následné poslání,
-        /// update či přidání nového záznamu pokud existuje
+        /// Metoda pro zpracování dat do objektů databáze a následné přidání, či aktualizaci
         /// </summary>
         /// <param name="dict"></param>
-        public void DictDataToDb(Dictionary<string, string> dict)
+        public void DictToDb(Dictionary<string, string> dict)
         {
-            // TODO - WIP - přiřadit hodnoty z dict do objektů
-            bool toAdd;
             using var ctx = new TrackerDbContext();
             Infected infected = new Infected();
             Vaccinated vaccinated = new Vaccinated();
 
-            var country = ctx.Countries.FirstOrDefault(x => x.Name == dict["Country"]);
-            if (ctx.Countries.FirstOrDefault(x => x.Name == dict["Country"]) != null)
+            // mzcr dokument
+            if (dict.ContainsKey("TotalCases"))
             {
-                toAdd = false;
+                infected.Source = dict["Source"];
+                infected.TotalCases = int.Parse(dict["TotalCases"]);
+                infected.NewCases = int.Parse(dict["NewCases"]);
+                infected.Date = Convert.ToDateTime(dict["Date"]);
             }
-            else
+            // who dokument
+            if (dict.ContainsKey("TotalVaccinations"))
             {
-                toAdd = true;
+                vaccinated.Source = dict["Source"];
+                vaccinated.TotalVaccinations = int.Parse(dict["TotalVaccinations"]);
+                vaccinated.NewVaccinations = int.Parse(dict["NewVaccinations"]);
+                infected.Date = Convert.ToDateTime(dict["Date"]);
             }
 
-            infected.Country = country;
             
-            
-            
-            if (toAdd == true)
+            var country = ctx.Countries.FirstOrDefault(x => x.Name == dict["Country"]);
+            if (country != null)
             {
                 infected.Country = country;
-                //ctx.Countries.Update();
+                vaccinated.Country = country;
             }
             else
             {
-                //ctx.Countries.Add();
+                Country countryNew = new Country();
+                countryNew.Name = dict["Country"];
+                ctx.Countries.Add(countryNew);
             }
+
+            ctx.Infected.Add(infected);
+            ctx.Vaccinated.Add(vaccinated);
+            ctx.SaveChanges();
         }
 
+
         // TODO dodělat aktualizaci populací (u všech) - volání v mainViewModel po aktualizaci všech ostatních dat
+        /// <summary>
+        /// Aktualizuje data v databázi o populacích všech zemí
+        /// </summary>
         public void UpdatePopulation()
         {
-            
+            using var ctx = new TrackerDbContext();
+            foreach (var record in ctx.Countries.ToList())
+            {
+                //TODO - najít populaci země a uložit do record
+                ctx.Update(record);
+            }
+
+            ctx.SaveChanges();
         }
     }
 }
