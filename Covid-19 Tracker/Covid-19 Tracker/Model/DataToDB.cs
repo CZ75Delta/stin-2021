@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Newtonsoft.Json;
 
 namespace Covid_19_Tracker.Model
 {
@@ -34,7 +37,7 @@ namespace Covid_19_Tracker.Model
                 vaccinated.Date = Convert.ToDateTime(dict["Date"]);
             }
 
-            
+
             var country = ctx.Countries.FirstOrDefault(x => x.Name == dict["Country"]);
             if (country != null)
             {
@@ -55,20 +58,45 @@ namespace Covid_19_Tracker.Model
         }
 
 
-        // TODO dodělat aktualizaci populací (u všech) - volání v mainViewModel po aktualizaci všech ostatních dat
         /// <summary>
         /// Aktualizuje data v databázi o populacích všech zemí
         /// </summary>
         public void UpdatePopulation()
         {
             using var ctx = new TrackerDbContext();
-            foreach (var record in ctx.Countries.ToList())
+            using var client = new WebClient();
+            var goodCodes = "";
+            string reply;
+            foreach (var country in ctx.Countries.ToList())
             {
-                //TODO - najít populaci země a uložit do record
-                ctx.Update(record);
+                if (country.IsoCode.StartsWith("X"))
+                {
+                    reply = client.DownloadString("https://restcountries.eu/rest/v2/name/" + country.Name + "?fields=population");
+                    var countryPopulation = JsonConvert.DeserializeObject<List<CountryPopulation>>(reply);
+                    country.Population = countryPopulation[0].Population;
+                    ctx.Countries.Update(country);
+                }
+                else
+                {
+                    goodCodes += country.IsoCode + ";";
+                }
             }
-
-            ctx.SaveChanges();
+            ctx.SaveChangesAsync();
+            reply = client.DownloadString("https://restcountries.eu/rest/v2/alpha/" + "?codes=" + goodCodes + "&fields=population;alpha3Code");
+            var countriesPopulation = JsonConvert.DeserializeObject<List<CountryPopulation>>(reply);
+            foreach (var country in countriesPopulation)
+            {
+                var updatedCountry = ctx.Countries.FirstOrDefaultAsync(x => x.IsoCode == country.Alpha3Code).Result;
+                if (updatedCountry == null) continue;
+                updatedCountry.Population = country.Population;
+                ctx.Countries.Update(updatedCountry);
+            }
+            ctx.SaveChangesAsync();
         }
+    }
+    public class CountryPopulation
+    {
+        public long Population { get; set; }
+        public string Alpha3Code { get; set; }
     }
 }
