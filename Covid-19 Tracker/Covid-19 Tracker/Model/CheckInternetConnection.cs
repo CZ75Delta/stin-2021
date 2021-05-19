@@ -5,7 +5,7 @@ namespace Covid_19_Tracker.Model
 {
     public class CheckInternetConnection
     {
-        public static bool CheckForInternetConnection(int timeoutMs = 10000, string url = null)
+        public bool CheckForInternetConnection(int timeoutMs = 10000, string url = null)
         {
             try
             {
