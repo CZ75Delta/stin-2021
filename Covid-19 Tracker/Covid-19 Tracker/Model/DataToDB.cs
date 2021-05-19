@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -15,7 +16,7 @@ namespace Covid_19_Tracker.Model
         /// Metoda pro zpracování dat do objektů databáze a následné přidání, či aktualizaci
         /// </summary>
         /// <param name="dict"></param>
-        public async void DictToDb(Dictionary<string, string> dict)
+        public async Task DictToDb(Dictionary<string, string> dict)
         {
             var infected = new Infected();
             var vaccinated = new Vaccinated();
@@ -54,7 +55,16 @@ namespace Covid_19_Tracker.Model
             await ctx.SaveChangesAsync();
         }
 
-        public async void InitializeCountries(List<Dictionary<string, string>> list)
+        public async Task ListToDb(IEnumerable<Dictionary<string, string>> list)
+        {
+            foreach (var dict in list)
+            {
+                await DictToDb(dict);
+            }
+        }
+
+
+        public async Task InitializeCountries(List<Dictionary<string, string>> list)
         {
             await using var ctx = new TrackerDbContext();
             foreach (var record in list)
@@ -72,7 +82,7 @@ namespace Covid_19_Tracker.Model
         /// <summary>
         /// Aktualizuje data v databázi o populacích všech zemí
         /// </summary>
-        public async void UpdatePopulation()
+        public async Task UpdatePopulation()
         {
             await using var ctx = new TrackerDbContext();
             using var client = new WebClient();

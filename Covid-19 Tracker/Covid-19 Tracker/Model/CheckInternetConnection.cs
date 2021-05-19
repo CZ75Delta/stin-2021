@@ -1,11 +1,12 @@
 using System.Globalization;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Covid_19_Tracker.Model
 {
     public class CheckInternetConnection
     {
-        public bool CheckForInternetConnection(int timeoutMs = 10000, string url = null)
+        public Task<bool> CheckForInternetConnection(int timeoutMs = 10000, string url = null)
         {
             try
             {
@@ -22,12 +23,12 @@ namespace Covid_19_Tracker.Model
                 var request = (HttpWebRequest)WebRequest.Create(url);
                 request.KeepAlive = false;
                 request.Timeout = timeoutMs;
-                using var response = (HttpWebResponse)request.GetResponse();
-                return true;
+                using var response = (HttpWebResponse)request.GetResponseAsync().Result;
+                return Task.FromResult(true);
             }
             catch
             {
-                return false;
+                return Task.FromResult(false);
             }
         }
     }
