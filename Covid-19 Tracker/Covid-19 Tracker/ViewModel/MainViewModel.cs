@@ -12,15 +12,10 @@ namespace Covid_19_Tracker.ViewModel
 
         private readonly ApiHandler _apiHandler;
         private readonly ProcessData _processData;
+        private readonly DataToDb _dataToDb;
 
         private string _progressText;
         private int _progressBar;
-
-        private Dictionary<string, string> dictMzcr;
-        private Dictionary<string, string> dictWho;
-        private DataToDb _dataToDb;
-
-        private List<Dictionary<string, string>> listWho;
 
         #endregion
 
@@ -42,45 +37,36 @@ namespace Covid_19_Tracker.ViewModel
 
         // TODO - kontrola internetového připojení
         // TODO - podle kontroly připojení internetu omezit použití aktualizace nebo vypsat varovnou zprávu
-        public void UpdateData()
+        private void UpdateData()
         {
+            //Reset ProgressBar
             ProgressBar = 0;
-            //MZČR
-            var prehledMzcr = _apiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json");
-            ProgressBar = 8;
-            
-            dictMzcr = new Dictionary<string, string>();
-            dictMzcr =_processData.JSONToDictMZCR(ProgressText);
-            _dataToDb.DictToDb(dictMzcr);
-            ProgressBar = 16;
-
-            //WHO ČR
-            string textWhoCr = _apiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv");
-            ProgressBar = 24;
-            dictWho = new Dictionary<string, string>();
-            dictWho = _processData.CSVToDictWHOCR(textWhoCr);
-            _dataToDb.DictToDb(dictWho);
-            ProgressBar = 32;
 
             //WHO Countries
-            string textWhoCountries = _apiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv");
-            ProgressBar = 40;
-
-            listWho = new List<Dictionary<string, string>>();
-            listWho = _processData.CSVToListWHOCountries(textWhoCountries);
+            var listWho = _processData.CSVToListWHOCountries(_apiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv"));
             foreach (var dict in listWho)
             {
                 _dataToDb.DictToDb(dict);
             }
-            ProgressBar = 50;
-            
+            ProgressBar = 20;
+
+            //Get MZČR Summary
+            _dataToDb.DictToDb(_processData.JSONToDictMZCR(_apiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json")));
+            ProgressBar = 40;
+
+            //GET WHO Infections
+            _dataToDb.DictToDb(_processData.CSVToDictWHOCR(_apiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv")));
+            ProgressBar = 60;
+
             _dataToDb.UpdatePopulation();
+            ProgressBar = 80;
         }
 
         #endregion
 
         public MainViewModel()
         {
+            _dataToDb = new DataToDb();
             _apiHandler = new ApiHandler();
             _processData = new ProcessData();
             RefreshCommand = new Command(UpdateData);

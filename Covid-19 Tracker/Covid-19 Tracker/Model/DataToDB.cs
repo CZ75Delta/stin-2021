@@ -31,7 +31,6 @@ namespace Covid_19_Tracker.Model
             {
                 vaccinated.Source = dict["Source"];
                 vaccinated.TotalVaccinations = int.Parse(dict["TotalVaccinations"]);
-                vaccinated.NewVaccinations = int.Parse(dict["NewVaccinations"]);
                 infected.Date = Convert.ToDateTime(dict["Date"]);
             }
 
@@ -46,6 +45,7 @@ namespace Covid_19_Tracker.Model
             {
                 Country countryNew = new Country();
                 countryNew.Name = dict["Country"];
+                countryNew.IsoCode = dict["IsoCode"];
                 ctx.Countries.Add(countryNew);
             }
 

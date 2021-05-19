@@ -27,9 +27,7 @@ namespace Covid_19_Tracker.Model
                 { "Country", "Czechia" },
                 { "TotalCases", value["data"][0]["potvrzene_pripady_celkem"].ToString() },
                 { "NewCases", value["data"][0]["potvrzene_pripady_vcerejsi_den"].ToString() },
-                { "TotalVaccinations", value["data"][0]["vykazana_ockovani_celkem"].ToString() },
-                { "NewVaccinations", value["data"][0]["vykazana_ockovani_vcerejsi_den"].ToString() }
-            };
+                { "TotalVaccinations", value["data"][0]["vykazana_ockovani_celkem"].ToString() }};
             return dict;
         }
 
