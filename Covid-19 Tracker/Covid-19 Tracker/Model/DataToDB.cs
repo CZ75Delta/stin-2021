@@ -31,7 +31,7 @@ namespace Covid_19_Tracker.Model
             {
                 vaccinated.Source = dict["Source"];
                 vaccinated.TotalVaccinations = int.Parse(dict["TotalVaccinations"]);
-                infected.Date = Convert.ToDateTime(dict["Date"]);
+                vaccinated.Date = Convert.ToDateTime(dict["Date"]);
             }
 
             
