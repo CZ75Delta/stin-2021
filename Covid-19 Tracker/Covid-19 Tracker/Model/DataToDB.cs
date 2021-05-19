@@ -15,12 +15,12 @@ namespace Covid_19_Tracker.Model
         /// Metoda pro zpracování dat do objektů databáze a následné přidání, či aktualizaci
         /// </summary>
         /// <param name="dict"></param>
-        public void DictToDb(Dictionary<string, string> dict)
+        public async void DictToDb(Dictionary<string, string> dict)
         {
-            Infected infected = new Infected();
-            Vaccinated vaccinated = new Vaccinated();
-            using var ctx = new TrackerDbContext();
-            
+            var infected = new Infected();
+            var vaccinated = new Vaccinated();
+            await using var ctx = new TrackerDbContext();
+
             if (dict.ContainsKey("TotalCases"))
             {
                 infected.Source = dict["Source"];
@@ -35,39 +35,46 @@ namespace Covid_19_Tracker.Model
                 vaccinated.TotalVaccinations = int.Parse(dict["TotalVaccinations"]);
                 vaccinated.Date = Convert.ToDateTime(dict["Date"]);
             }
-            
+
             // přidání státu do DB pokud neexistuje
             var country = ctx.Countries.FirstOrDefault(x => x.Name == dict["Country"]);
-            if (country == null)
-            {
-                Country countryNew = new Country();
-                countryNew.Name = dict["Country"];
-                countryNew.IsoCode = dict["IsoCode"];
-                ctx.Countries.Add(countryNew);
-            }
 
             // přidání do DB pokud není null
             if (infected.Source != null)
             {
-                infected.Country = country;
-                ctx.Infected.Add(infected);
+                if (country != null) infected.CountryId = country.Id;
+                await ctx.Infected.AddAsync(infected);
             }
             if (vaccinated.Source != null)
             {
-                vaccinated.Country = country;
-                ctx.Vaccinated.Add(vaccinated);
+                if (country != null) vaccinated.CountryId = country.Id;
+                await ctx.Vaccinated.AddAsync(vaccinated);
             }
-            
-            ctx.SaveChanges();
+
+            await ctx.SaveChangesAsync();
         }
 
+        public async void InitializeCountries(List<Dictionary<string, string>> list)
+        {
+            await using var ctx = new TrackerDbContext();
+            foreach (var record in list)
+            {
+                var newCountry = new Country
+                {
+                    Name = record["Country"],
+                    IsoCode = record["IsoCode"]
+                };
+                await ctx.Countries.AddAsync(newCountry);
+            }
+            await ctx.SaveChangesAsync();
+        }
 
         /// <summary>
         /// Aktualizuje data v databázi o populacích všech zemí
         /// </summary>
-        public void UpdatePopulation()
+        public async void UpdatePopulation()
         {
-            using var ctx = new TrackerDbContext();
+            await using var ctx = new TrackerDbContext();
             using var client = new WebClient();
             var goodCodes = "";
             string reply;
@@ -85,7 +92,7 @@ namespace Covid_19_Tracker.Model
                     goodCodes += country.IsoCode + ";";
                 }
             }
-            ctx.SaveChangesAsync();
+            await ctx.SaveChangesAsync();
             reply = client.DownloadString("https://restcountries.eu/rest/v2/alpha/" + "?codes=" + goodCodes + "&fields=population;alpha3Code");
             var countriesPopulation = JsonConvert.DeserializeObject<List<CountryPopulation>>(reply);
             foreach (var country in countriesPopulation)
@@ -95,7 +102,7 @@ namespace Covid_19_Tracker.Model
                 updatedCountry.Population = country.Population;
                 ctx.Countries.Update(updatedCountry);
             }
-            ctx.SaveChangesAsync();
+            await ctx.SaveChangesAsync();
         }
     }
     public class CountryPopulation

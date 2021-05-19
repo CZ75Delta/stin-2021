@@ -42,23 +42,24 @@ namespace Covid_19_Tracker.ViewModel
             //Reset ProgressBar
             ProgressBar = 0;
 
-            //WHO Countries
+            //GET WHO Vaccinations
             var listWho = _processData.CSVToListWHOCountries(_apiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv"));
-            foreach (var dict in listWho)
+            _dataToDb.InitializeCountries(listWho);
+            _dataToDb.UpdatePopulation();
+            ProgressBar = 20;
+
+            foreach(var dict in listWho)
             {
                 _dataToDb.DictToDb(dict);
             }
-            ProgressBar = 20;
-
-            //Get MZČR Summary
-            _dataToDb.DictToDb(_processData.JSONToDictMZCR(_apiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json")));
             ProgressBar = 40;
+
+            //GET MZČR Summary
+            _dataToDb.DictToDb(_processData.JSONToDictMZCR(_apiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json")));
+            ProgressBar = 60;
 
             //GET WHO Infections
             _dataToDb.DictToDb(_processData.CSVToDictWHOCR(_apiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv")));
-            ProgressBar = 60;
-
-            _dataToDb.UpdatePopulation();
             ProgressBar = 80;
         }
 
