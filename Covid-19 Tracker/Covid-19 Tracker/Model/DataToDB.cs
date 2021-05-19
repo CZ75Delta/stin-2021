@@ -17,11 +17,10 @@ namespace Covid_19_Tracker.Model
         /// <param name="dict"></param>
         public void DictToDb(Dictionary<string, string> dict)
         {
-            using var ctx = new TrackerDbContext();
             Infected infected = new Infected();
             Vaccinated vaccinated = new Vaccinated();
-
-            // mzcr dokument
+            using var ctx = new TrackerDbContext();
+            
             if (dict.ContainsKey("TotalCases"))
             {
                 infected.Source = dict["Source"];
@@ -29,22 +28,17 @@ namespace Covid_19_Tracker.Model
                 infected.NewCases = int.Parse(dict["NewCases"]);
                 infected.Date = Convert.ToDateTime(dict["Date"]);
             }
-            // who dokument
+            
             if (dict.ContainsKey("TotalVaccinations"))
             {
                 vaccinated.Source = dict["Source"];
                 vaccinated.TotalVaccinations = int.Parse(dict["TotalVaccinations"]);
                 vaccinated.Date = Convert.ToDateTime(dict["Date"]);
             }
-
-
+            
+            // přidání státu do DB pokud neexistuje
             var country = ctx.Countries.FirstOrDefault(x => x.Name == dict["Country"]);
-            if (country != null)
-            {
-                infected.Country = country;
-                vaccinated.Country = country;
-            }
-            else
+            if (country == null)
             {
                 Country countryNew = new Country();
                 countryNew.Name = dict["Country"];
@@ -52,8 +46,18 @@ namespace Covid_19_Tracker.Model
                 ctx.Countries.Add(countryNew);
             }
 
-            ctx.Infected.Add(infected);
-            ctx.Vaccinated.Add(vaccinated);
+            // přidání do DB pokud není null
+            if (infected.Source != null)
+            {
+                infected.Country = country;
+                ctx.Infected.Add(infected);
+            }
+            if (vaccinated.Source != null)
+            {
+                vaccinated.Country = country;
+                ctx.Vaccinated.Add(vaccinated);
+            }
+            
             ctx.SaveChanges();
         }
 
