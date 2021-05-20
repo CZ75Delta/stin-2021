@@ -15,7 +15,7 @@ namespace Covid_19_Tracker.ViewModel
         private readonly ApiHandler _apiHandler;
         private readonly ProcessData _processData;
         private readonly DataToDb _dataToDb;
-        private readonly CheckInternetConnection _checkInternetConnection;
+        private readonly CheckInternetConnection _checkInternet;
 
         private string _progressText;
         private int _progressBar;
@@ -38,11 +38,9 @@ namespace Covid_19_Tracker.ViewModel
 
         #region Command Methods
 
-        // TODO - kontrola internetového připojení
-        // TODO - podle kontroly připojení internetu omezit použití aktualizace nebo vypsat varovnou zprávu
         private async void UpdateData()
         {
-            if (await _checkInternetConnection.CheckForInternetConnection(1000))
+            if (await _checkInternet.CheckForInternetConnection(1000))
             {
                 await Task.Factory.StartNew(async () =>
                 {
@@ -51,18 +49,17 @@ namespace Covid_19_Tracker.ViewModel
                     //GET WHO Vaccinations
                     var listWho = _processData.CSVToListWHOCountries(_apiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv").Result).Result;
                     await _dataToDb.InitializeCountries(listWho);
-                    await _dataToDb.UpdatePopulation();
                     ProgressBar = 20;
 
-                    await _dataToDb.ListToDb(listWho);
+                    await _dataToDb.SavetoDb(listWho);
                     ProgressBar = 40;
 
                     //GET MZČR Summary
-                    await _dataToDb.DictToDb(_processData.JSONToDictMZCR(_apiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json").Result).Result);
+                    await _dataToDb.SavetoDb(_processData.JSONToDictMZCR(_apiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json").Result).Result);
                     ProgressBar = 60;
 
                     //GET WHO Infections
-                    await _dataToDb.DictToDb(_processData.CSVToDictWHOCR(_apiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv").Result).Result);
+                    await _dataToDb.SavetoDb(_processData.CSVToDictWHOCR(_apiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv").Result).Result);
                     ProgressBar = 80;
 
                     ProgressText = "Naposledy aktualizováno v " + DateTime.Now.ToString("HH:mm");
@@ -81,8 +78,9 @@ namespace Covid_19_Tracker.ViewModel
             _dataToDb = new DataToDb();
             _apiHandler = new ApiHandler();
             _processData = new ProcessData();
-            _checkInternetConnection = new CheckInternetConnection();
+            _checkInternet = new CheckInternetConnection();
             RefreshCommand = new Command(UpdateData);
+            ProgressText = "Naposledy aktualizováno v " + DateTime.Now.ToString("HH:mm");
         }
 
         private new void OnPropertyChanged([CallerMemberName] string propertyName = "") { base.OnPropertyChanged(propertyName); }

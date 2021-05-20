@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Threading.Tasks;
+using System.Windows;
 using Covid_19_Tracker.Model;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,11 +10,25 @@ namespace Covid_19_Tracker
     /// </summary>
     public partial class App : Application
     {
-        protected override void OnStartup(StartupEventArgs e)
+        protected override async void OnStartup(StartupEventArgs e)
         {
-            using var ctx = new TrackerDbContext();
-            ctx.Database.Migrate();
-            ctx.SaveChanges();
+            await Task.Factory.StartNew(async () =>
+            {
+                //Migrate Database
+                await using var ctx = new TrackerDbContext();
+                await ctx.Database.MigrateAsync();
+                await ctx.SaveChangesAsync();
+
+                //Update on startup
+                var apiHandler = new ApiHandler();
+                var processData = new ProcessData();
+                var dataToDb = new DataToDb();
+                var listWho = processData.CSVToListWHOCountries(apiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv").Result).Result;
+                await dataToDb.InitializeCountries(listWho);
+                await dataToDb.ListToDb(listWho);
+                await dataToDb.DictToDb(processData.JSONToDictMZCR(apiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json").Result).Result);
+                await dataToDb.DictToDb(processData.CSVToDictWHOCR(apiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv").Result).Result);
+            });
         }
     }
 }

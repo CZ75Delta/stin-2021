@@ -13,62 +13,91 @@ namespace Covid_19_Tracker.Model
     public class DataToDb
     {
         /// <summary>
-        /// Metoda pro zpracování dat do objektů databáze a následné přidání, či aktualizaci
+        /// Metoda pro přidání jednoho záznamu do databáze
         /// </summary>
-        /// <param name="dict"></param>
-        public async Task DictToDb(Dictionary<string, string> dict)
+        /// <param name="dict">Dictionary se záznamem, který chceme přidat do databáze</param>
+        public async Task SavetoDb(Dictionary<string, string> dict)
         {
             var infected = new Infected();
             var vaccinated = new Vaccinated();
             await using var ctx = new TrackerDbContext();
 
-            if (dict.ContainsKey("TotalCases"))
+            if (ctx.Countries.Any(x => x.Name == dict["Country"]))
             {
-                infected.Source = dict["Source"];
-                infected.TotalCases = int.Parse(dict["TotalCases"]);
-                infected.NewCases = int.Parse(dict["NewCases"]);
-                infected.Date = Convert.ToDateTime(dict["Date"]);
-            }
-            
-            if (dict.ContainsKey("TotalVaccinations"))
-            {
-                vaccinated.Source = dict["Source"];
-                vaccinated.TotalVaccinations = int.Parse(dict["TotalVaccinations"]);
-                vaccinated.Date = Convert.ToDateTime(dict["Date"]);
-            }
+                var country = ctx.Countries.FirstOrDefault(x => x.Name == dict["Country"]);
 
-            // přidání státu do DB pokud neexistuje
-            var country = ctx.Countries.FirstOrDefault(x => x.Name == dict["Country"]);
+                if (dict.ContainsKey("TotalCases") && !ctx.Infected.Any(x => x.Source.Equals(dict["Source"]) && x.Date.Equals(Convert.ToDateTime(dict["Date"])) && x.CountryId.Equals(country.Id)))
+                {
+                    infected.Source = dict["Source"];
+                    infected.TotalCases = int.Parse(dict["TotalCases"]);
+                    infected.NewCases = int.Parse(dict["NewCases"]);
+                    infected.Date = Convert.ToDateTime(dict["Date"]);
+                    if (country != null) infected.CountryId = country.Id;
+                    await ctx.Infected.AddAsync(infected);
+                }
 
-            // přidání do DB pokud není null
-            if (infected.Source != null)
-            {
-                if (country != null) infected.CountryId = country.Id;
-                await ctx.Infected.AddAsync(infected);
-            }
-            if (vaccinated.Source != null)
-            {
-                if (country != null) vaccinated.CountryId = country.Id;
-                await ctx.Vaccinated.AddAsync(vaccinated);
+                if (dict.ContainsKey("TotalVaccinations") && !ctx.Vaccinated.Any(x => x.Source.Equals(dict["Source"]) && x.Date.Equals(Convert.ToDateTime(dict["Date"])) && x.CountryId.Equals(country.Id)))
+                {
+                    vaccinated.Source = dict["Source"];
+                    vaccinated.TotalVaccinations = int.Parse(dict["TotalVaccinations"]);
+                    vaccinated.Date = Convert.ToDateTime(dict["Date"]);
+                    if (country != null) vaccinated.CountryId = country.Id;
+                    await ctx.Vaccinated.AddAsync(vaccinated);
+                }
             }
 
             await ctx.SaveChangesAsync();
         }
 
-        public async Task ListToDb(IEnumerable<Dictionary<string, string>> list)
+        /// <summary>
+        /// Metoda pro přidání více záznamů do databáze
+        /// </summary>
+        /// <param name="dict">List Dictionary se záznamy, které chceme přidat do databáze</param>
+        public async Task SavetoDb(IEnumerable<Dictionary<string, string>> list)
         {
+            await using var ctx = new TrackerDbContext();
+
             foreach (var dict in list)
             {
-                await DictToDb(dict);
+                var infected = new Infected();
+                var vaccinated = new Vaccinated();
+                if (ctx.Countries.Any(x => x.Name == dict["Country"]))
+                {
+                    var country = ctx.Countries.FirstOrDefault(x => x.Name == dict["Country"]);
+
+                    if (dict.ContainsKey("TotalCases") && !ctx.Infected.Any(x => x.Source.Equals(dict["Source"]) && x.Date.Equals(Convert.ToDateTime(dict["Date"])) && x.CountryId.Equals(country.Id)))
+                    {
+                        infected.Source = dict["Source"];
+                        infected.TotalCases = int.Parse(dict["TotalCases"]);
+                        infected.NewCases = int.Parse(dict["NewCases"]);
+                        infected.Date = Convert.ToDateTime(dict["Date"]);
+                        if (country != null) infected.CountryId = country.Id;
+                        await ctx.Infected.AddAsync(infected);
+                    }
+
+                    if (dict.ContainsKey("TotalVaccinations") && !ctx.Vaccinated.Any(x => x.Source.Equals(dict["Source"]) && x.Date.Equals(Convert.ToDateTime(dict["Date"])) && x.CountryId.Equals(country.Id)))
+                    {
+                        vaccinated.Source = dict["Source"];
+                        vaccinated.TotalVaccinations = int.Parse(dict["TotalVaccinations"]);
+                        vaccinated.Date = Convert.ToDateTime(dict["Date"]);
+                        if (country != null) vaccinated.CountryId = country.Id;
+                        await ctx.Vaccinated.AddAsync(vaccinated);
+                    }
+                }
             }
+            await ctx.SaveChangesAsync();
         }
 
-
-        public async Task InitializeCountries(List<Dictionary<string, string>> list)
+        /// <summary>
+        /// Inicializuje databázi zemí
+        /// </summary>
+        /// <param name="list">WHO List zemí</param>
+        public async Task InitializeCountries(IEnumerable<Dictionary<string, string>> list)
         {
             await using var ctx = new TrackerDbContext();
             foreach (var record in list)
             {
+                if (ctx.Countries.Any(x => x.Name == record["Country"])) continue;
                 var newCountry = new Country
                 {
                     Name = record["Country"],
@@ -77,12 +106,13 @@ namespace Covid_19_Tracker.Model
                 await ctx.Countries.AddAsync(newCountry);
             }
             await ctx.SaveChangesAsync();
+            await UpdatePopulation();
         }
 
         /// <summary>
         /// Aktualizuje data v databázi o populacích všech zemí
         /// </summary>
-        public async Task UpdatePopulation()
+        private async Task UpdatePopulation()
         {
             await using var ctx = new TrackerDbContext();
             using var client = new WebClient();
