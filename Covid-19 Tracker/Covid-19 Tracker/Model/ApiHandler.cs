@@ -3,27 +3,28 @@ using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Covid_19_Tracker.Model
 {
     public class ApiHandler
     {
-        public string DownloadFromUrl(string url)
+        public async Task<string> DownloadFromUrl(string url)
         {
             try
             {
                 var request = (HttpWebRequest)WebRequest.Create(url);
-                var response = (HttpWebResponse)request.GetResponse();
+                var response = (HttpWebResponse)request.GetResponseAsync().Result;
 
                 if ("gzip".Equals(response.ContentEncoding))
                 {
                     Stream stream = new GZipStream(response.GetResponseStream(), CompressionMode.Decompress);
-                    var content = new StreamReader(stream, Encoding.UTF8).ReadToEnd();
+                    var content = await new StreamReader(stream, Encoding.UTF8).ReadToEndAsync();
                     return content;
                 }
                 else
                 {
-                    var content =  new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
+                    var content = await new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEndAsync();
                     return content;
                 }
             }

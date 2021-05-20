@@ -17,7 +17,7 @@ namespace Covid_19_Tracker.Model
         /// <returns>Dictionary
         /// keys - Date, Source, Country, TotalCases (celkový počet nakažených), NewCases, TotalVaccinations, NewVaccinations
         /// </returns>
-        public Dictionary<string, string> JSONToDictMZCR(string json)
+        public async Task<Dictionary<string, string>> JSONToDictMZCR(string json)
         {
             var value = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(json);
             var dict = new Dictionary<string, string>
@@ -27,10 +27,8 @@ namespace Covid_19_Tracker.Model
                 { "Country", "Czechia" },
                 { "TotalCases", value["data"][0]["potvrzene_pripady_celkem"].ToString() },
                 { "NewCases", value["data"][0]["potvrzene_pripady_vcerejsi_den"].ToString() },
-                { "TotalVaccinations", value["data"][0]["vykazana_ockovani_celkem"].ToString() },
-                { "NewVaccinations", value["data"][0]["vykazana_ockovani_vcerejsi_den"].ToString() }
-            };
-            return dict;
+                { "TotalVaccinations", value["data"][0]["vykazana_ockovani_celkem"].ToString() }};
+            return await Task.FromResult(dict);
         }
 
         /// <summary>
@@ -40,7 +38,7 @@ namespace Covid_19_Tracker.Model
         /// <returns>Dictionary
         /// keys - Date, Source, Country, TotalCases (celkový počet nakažených), NewCases
         /// </returns>
-        public Dictionary<string, string> CSVToDictWHOCR(string csv)
+        public async Task<Dictionary<string, string>> CSVToDictWHOCR(string csv)
         {
             var lines = csv.Split('\n');
             var dateYesterday = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
@@ -57,8 +55,9 @@ namespace Covid_19_Tracker.Model
                     {"TotalCases", data[5]},
                     {"NewCases", data[4]}
                 };
-                return dict;
+                return await Task.FromResult(dict);
             }
+
             return null;
         }
 
@@ -70,14 +69,14 @@ namespace Covid_19_Tracker.Model
         /// dictionary
         /// keys - Date, Source, Country, IsoCode,TotalVaccinations
         /// </returns>
-        public List<Dictionary<string, string>> CSVToListWHOCountries(string csv)
+        public async Task<List<Dictionary<string, string>>> CSVToListWHOCountries(string csv)
         {
             var list = new List<Dictionary<string, string>>();
             var lines = csv.Split("\r\n");
             for (var i = 1; i < lines.Length - 1; i++)
             {
-                Regex regx = new Regex(',' + "(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
-                var data = regx.Split(lines[i]);
+                var regex = new Regex(',' + "(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+                var data = regex.Split(lines[i]);
 
                 //var data = lines[i].Split(',');
                 var dict = new Dictionary<string, string>
@@ -90,7 +89,7 @@ namespace Covid_19_Tracker.Model
                 };
                 list.Add(dict);
             }
-            return list;
+            return await Task.FromResult(list);
         }
     }
 }

@@ -3,14 +3,16 @@ using System;
 using Covid_19_Tracker.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Covid_19_Tracker.Migrations
 {
     [DbContext(typeof(TrackerDbContext))]
-    partial class TrackerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210519181704_Mig03")]
+    partial class Mig03
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,7 +30,7 @@ namespace Covid_19_Tracker.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
-                    b.Property<long>("Population")
+                    b.Property<int>("Population")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -42,7 +44,7 @@ namespace Covid_19_Tracker.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("CountryId")
+                    b.Property<int?>("CountryId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Date")
@@ -70,7 +72,7 @@ namespace Covid_19_Tracker.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("CountryId")
+                    b.Property<int?>("CountryId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Date")
@@ -93,9 +95,7 @@ namespace Covid_19_Tracker.Migrations
                 {
                     b.HasOne("Covid_19_Tracker.Model.Country", "Country")
                         .WithMany("Infected")
-                        .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CountryId");
 
                     b.Navigation("Country");
                 });
@@ -104,9 +104,7 @@ namespace Covid_19_Tracker.Migrations
                 {
                     b.HasOne("Covid_19_Tracker.Model.Country", "Country")
                         .WithMany("Vaccinated")
-                        .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CountryId");
 
                     b.Navigation("Country");
                 });
