@@ -23,6 +23,7 @@ namespace Covid_19_Tracker.ViewModel
         private int _retrySeconds;
         private string _progressText;
         private bool _progressBar;
+        private bool _updateEnabled;
         private DateTime _lastUpdate;
 
         #endregion
@@ -31,7 +32,7 @@ namespace Covid_19_Tracker.ViewModel
 
         public string ProgressText { get => _progressText; private set { _progressText = value; OnPropertyChanged(); } }
         public bool ProgressBar { get => _progressBar; private set { _progressBar = value; OnPropertyChanged(); } }
-
+        public bool UpdateEnabled { get => _updateEnabled; private set { _updateEnabled = value; OnPropertyChanged(); } }
 
         #endregion
 
@@ -50,7 +51,8 @@ namespace Covid_19_Tracker.ViewModel
                 _lastUpdate = DateTime.Now;
                 await Task.Factory.StartNew(async () =>
                 {
-                    ProgressBar = true;
+                    ProgressText = "Hledám aktualizace...";
+                    UpdateEnabled = ProgressBar = true;
 
                     //GET WHO Vaccinations
                     var listWho = _processData.CSVToListWHOCountries(_apiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv").Result).Result;
@@ -69,6 +71,7 @@ namespace Covid_19_Tracker.ViewModel
             }
             else
             {
+                UpdateEnabled = false;
                 SetRetryTextTimer();
             }
 
