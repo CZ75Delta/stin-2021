@@ -42,7 +42,7 @@
                     </ItemsPanelTemplate>
                 </StatusBar.ItemsPanel>
                 <StatusBarItem>
-                    <ProgressBar Value="{Binding Path=ProgressBar, Mode=OneWay}" Width="140" Height="16" />
+                    <ProgressBar IsIndeterminate="{Binding Path=ProgressBar, Mode=OneWay}" Width="140" Height="16" Margin="3,0,0,0"/>
                 </StatusBarItem>
                 <Separator Grid.Column="1" />
                 <StatusBarItem Grid.Column="2">
