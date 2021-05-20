@@ -25,9 +25,9 @@ namespace Covid_19_Tracker
                 var dataToDb = new DataToDb();
                 var listWho = processData.CSVToListWHOCountries(apiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv").Result).Result;
                 await dataToDb.InitializeCountries(listWho);
-                await dataToDb.ListToDb(listWho);
-                await dataToDb.DictToDb(processData.JSONToDictMZCR(apiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json").Result).Result);
-                await dataToDb.DictToDb(processData.CSVToDictWHOCR(apiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv").Result).Result);
+                await dataToDb.SavetoDb(listWho);
+                await dataToDb.SavetoDb(processData.JSONToDictMZCR(apiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json").Result).Result);
+                await dataToDb.SavetoDb(processData.CSVToDictWHOCR(apiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv").Result).Result);
             });
         }
     }
