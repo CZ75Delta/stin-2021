@@ -7,6 +7,8 @@ using System.Windows;
 using System.Windows.Threading;
 using Covid_19_Tracker.Base;
 using Covid_19_Tracker.Model;
+using Serilog;
+
 
 namespace Covid_19_Tracker.ViewModel
 {
@@ -46,6 +48,7 @@ namespace Covid_19_Tracker.ViewModel
 
         private async void UpdateData()
         {
+            Log.Information("Starting update.");
             if (await _checkInternet.CheckForInternetConnection(1000))
             {
                 _lastUpdate = DateTime.Now;
@@ -67,6 +70,7 @@ namespace Covid_19_Tracker.ViewModel
                     await _dataToDb.SavetoDb(_processData.CSVToDictWHOCR(_apiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv").Result).Result);
 
                     ProgressText = "Poslední aktualizace v " + _lastUpdate.ToString("HH:mm");
+                    Log.Information("Update finished.");
                 });
             }
             else
@@ -80,6 +84,7 @@ namespace Covid_19_Tracker.ViewModel
 
         #endregion
 
+        #region Constructor
         public MainViewModel()
         {
             _dataToDb = new DataToDb();
@@ -92,12 +97,17 @@ namespace Covid_19_Tracker.ViewModel
             UpdateData();
         }
 
+        #endregion
+
+        #region Private Methods
+
         private void SetRetryTextTimer()
         {
-            _retryTextTimer = new DispatcherTimer {Interval = TimeSpan.FromMilliseconds(1000)};
+            _retryTextTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1000) };
             _retryTextTimer.Tick += SetRetryTextTimerTick;
             _retryTextTimer.Start();
             _retrySeconds = 30;
+            Log.Warning("Starting retry Timer.");
             ProgressText = "Nelze se připojit k internetu, zkouším znovu za " + _retrySeconds + "s";
         }
 
@@ -108,6 +118,7 @@ namespace Covid_19_Tracker.ViewModel
             if (_retrySeconds != 0) return;
             _retryTextTimer.Stop();
             UpdateData();
+            Log.Warning("Retrying update.");
         }
 
         private void SetUpdateTimer(double interval)
@@ -122,6 +133,8 @@ namespace Covid_19_Tracker.ViewModel
         {
             UpdateData();
         }
+
+        #endregion
 
         private new void OnPropertyChanged([CallerMemberName] string propertyName = "") { base.OnPropertyChanged(propertyName); }
     }

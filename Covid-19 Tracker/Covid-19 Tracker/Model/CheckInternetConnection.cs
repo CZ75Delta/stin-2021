@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace Covid_19_Tracker.Model
 {
@@ -24,10 +25,12 @@ namespace Covid_19_Tracker.Model
                 request.KeepAlive = false;
                 request.Timeout = timeoutMs;
                 using var response = (HttpWebResponse)request.GetResponseAsync().Result;
+                Log.Information("Connection established.");
                 return Task.FromResult(true);
             }
             catch
             {
+                Log.Error("No Internet Connection");
                 return Task.FromResult(false);
             }
         }
