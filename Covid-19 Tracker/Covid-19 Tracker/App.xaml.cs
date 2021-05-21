@@ -1,7 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System.Globalization;
+using System.Threading.Tasks;
 using System.Windows;
 using Covid_19_Tracker.Model;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace Covid_19_Tracker
 {
@@ -12,6 +14,12 @@ namespace Covid_19_Tracker
     {
         protected override async void OnStartup(StartupEventArgs e)
         {
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File("log.txt", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10,
+                    fileSizeLimitBytes: 52428800, rollOnFileSizeLimit: true)
+                .WriteTo.Telegram(
+                    "1896853074:AAGadAOmXiE90sTPlsxEyniV-f0WnU1CKlA", "-500972830", formatProvider: new CultureInfo("cs-CZ"))
+                .CreateLogger();
             await Task.Factory.StartNew(async () =>
             {
                 //Migrate Database
@@ -19,6 +27,12 @@ namespace Covid_19_Tracker
                 await ctx.Database.MigrateAsync();
                 await ctx.SaveChangesAsync();
             });
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            Log.CloseAndFlush();
+            base.OnExit(e);
         }
     }
 }
