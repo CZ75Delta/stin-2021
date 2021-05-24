@@ -3,30 +3,56 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Covid_19_Tracker"
+        xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
         xmlns:mvm="clr-namespace:Covid_19_Tracker.ViewModel"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" MinHeight="400" MinWidth="600">
+        Title="Covid-19 Tracker" Height="450" Width="800" MinHeight="400" MinWidth="600">
     <Window.DataContext>
         <mvm:MainViewModel />
     </Window.DataContext>
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="70"/>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="70"/>
+            <ColumnDefinition Width="100"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="23"/>
             <RowDefinition/>
             <RowDefinition Height="25"/>
         </Grid.RowDefinitions>
-        <TabControl Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" SelectionChanged="Selector_OnSelectionChanged">
+        <TabControl Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" SelectionChanged="Selector_OnSelectionChanged" Grid.ColumnSpan="5">
             <TabItem Header="Nakažení v ČR" x:Name="InfectedTab">
                 <Grid Background="#FFE5E5E5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="65"/>
+                    </Grid.RowDefinitions>
+                    <ContentControl Grid.Row="0" Grid.Column="0" x:Name="InfectedPlot" Content="{Binding PlotControl}"/>
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding Infected}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" CanUserResizeRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Zdroj Dat" Width="1*" Binding="{Binding Source}"/>
+                            <DataGridTextColumn Header="Celkový počet případů" Width="2*"  Binding="{Binding TotalCases}" />
+                            <DataGridTextColumn Header="Nové případy" Width="2*"  Binding="{Binding NewCases}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
             </TabItem>
             <TabItem Header="Proočkovanost ve světě" x:Name="VaccinatedTab">
                 <Grid Background="#FFE5E5E5"/>
             </TabItem>
         </TabControl>
-        <DatePicker x:Name="DatePicker" Grid.Row="0" HorizontalAlignment="Right" Height="23" Margin="0,-1,0,0" FirstDayOfWeek="Monday"></DatePicker>
-        <DockPanel Grid.Column="0" Grid.Row="2">
+        <TextBlock Text="Datum: " TextAlignment="Right" FontSize="12" Grid.Row="0" Grid.Column="3" Margin="0,3,0,0"/>
+        <DatePicker x:Name="EndDatePicker" Grid.Row="0" HorizontalAlignment="Center" Height="23" FirstDayOfWeek="Monday" SelectedDate="{Binding SelectedDate, Mode=TwoWay}" DisplayDateStart="{Binding EarliestDate}" DisplayDateEnd="{Binding LatestDate}" SelectedDateFormat="Short" Grid.Column="4">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="SelectedDateChanged">
+                    <i:InvokeCommandAction Command="{Binding OnDateChangedCommand}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </DatePicker>
+        <DockPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="5">
             <StatusBar DockPanel.Dock="Bottom">
                 <StatusBar.ItemsPanel>
                     <ItemsPanelTemplate>
