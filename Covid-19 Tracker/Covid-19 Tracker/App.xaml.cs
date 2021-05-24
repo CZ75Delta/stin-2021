@@ -18,7 +18,7 @@ namespace Covid_19_Tracker
                 .WriteTo.File("log.txt", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10,
                     fileSizeLimitBytes: 52428800, rollOnFileSizeLimit: true)
                 .WriteTo.Telegram(
-                    "1896853074:AAGadAOmXiE90sTPlsxEyniV-f0WnU1CKlA", "-500972830", applicationName: ic.GetIdentification().Result)
+                    "1896853074:AAGadAOmXiE90sTPlsxEyniV-f0WnU1CKlA", "-500972830", applicationName: IdentifyComputer.GetIdentification().Result)
                 .CreateLogger();
             Log.Information("Application started.");
             await Task.Factory.StartNew(async () =>

@@ -5,23 +5,29 @@ namespace Covid_19_Tracker.Base
 {
     public class Command : ICommand
     {
-        private readonly Action _execute;
+        private readonly Predicate<object> _canExecute;
+        private readonly Action<object> _execute;
 
-        public Command(Action execute)
+        public Command(Predicate<object> canExecute, Action<object> execute)
         {
+            _canExecute = canExecute;
             _execute = execute;
         }
 
-        public event EventHandler CanExecuteChanged;
+        public event EventHandler CanExecuteChanged
+        {
+            add => CommandManager.RequerySuggested += value;
+            remove => CommandManager.RequerySuggested -= value;
+        }
 
         public bool CanExecute(object parameter)
         {
-            return true;
+            return _canExecute(parameter);
         }
 
         public void Execute(object parameter)
         {
-            _execute();
+            _execute(parameter);
         }
     }
 }

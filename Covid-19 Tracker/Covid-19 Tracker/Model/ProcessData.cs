@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Covid_19_Tracker.Model
 {
-    class ProcessData
+    internal class ProcessData
     {
         /// <summary>
         /// Metoda pro vybrání dat z JSON MZCR
@@ -15,7 +15,7 @@ namespace Covid_19_Tracker.Model
         /// <returns>Dictionary
         /// keys - Date, Source, Country, TotalCases (celkový počet nakažených), NewCases, TotalVaccinations, NewVaccinations
         /// </returns>
-        public async Task<Dictionary<string, string>> JSONToDictMZCR(string json)
+        public static async Task<Dictionary<string, string>> ProcessMzcr(string json)
         {
             var value = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(json);
             var dict = new Dictionary<string, string>
@@ -36,7 +36,7 @@ namespace Covid_19_Tracker.Model
         /// <returns>Dictionary
         /// keys - Date, Source, Country, TotalCases (celkový počet nakažených), NewCases
         /// </returns>
-        public async Task<Dictionary<string, string>> CSVToDictWHOCR(string csv)
+        public static async Task<Dictionary<string, string>> ProcessWhoInfected(string csv)
         {
             var lines = csv.Split('\n');
             var dateYesterday = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
@@ -67,7 +67,7 @@ namespace Covid_19_Tracker.Model
         /// dictionary
         /// keys - Date, Source, Country, IsoCode,TotalVaccinations
         /// </returns>
-        public async Task<List<Dictionary<string, string>>> CSVToListWHOCountries(string csv)
+        public static async Task<List<Dictionary<string, string>>> ProcessWhoVaccinated(string csv)
         {
             var list = new List<Dictionary<string, string>>();
             var lines = csv.Split("\r\n");

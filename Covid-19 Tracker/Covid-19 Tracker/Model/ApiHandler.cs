@@ -9,7 +9,7 @@ namespace Covid_19_Tracker.Model
 {
     public class ApiHandler
     {
-        public async Task<string> DownloadFromUrl(string url)
+        public static async Task<string> DownloadFromUrl(string url)
         {
             try
             {

@@ -19,17 +19,14 @@ namespace Covid_19_Tracker.ViewModel
     {
         #region Global Variables
 
-        private readonly ApiHandler _apiHandler;
-        private readonly ProcessData _processData;
-        private readonly DataToDb _dataToDb;
         private readonly WpfPlot _plotControl;
-        private readonly CheckInternetConnection _checkInternet;
         private Timer _updateTimer;
         private DispatcherTimer _retryTextTimer;
         private int _retrySeconds;
         private string _progressText;
         private bool _progressBar;
         private bool _updateEnabled;
+        private bool _uiEnabled;
         private ObservableCollection<Infected> _infected;
         private DateTime _lastUpdate;
         private DateTime _selectedDate;
@@ -43,6 +40,7 @@ namespace Covid_19_Tracker.ViewModel
         public string ProgressText { get => _progressText; private set { _progressText = value; OnPropertyChanged(); } }
         public bool ProgressBar { get => _progressBar; private set { _progressBar = value; OnPropertyChanged(); } }
         public bool UpdateEnabled { get => _updateEnabled; private set { _updateEnabled = value; OnPropertyChanged(); } }
+        public bool UiEnabled { get => _uiEnabled; private set { _uiEnabled = value; OnPropertyChanged(); } }
         public ObservableCollection<Infected> Infected { get => _infected; private set { _infected = value; OnPropertyChanged(); } }
         public DateTime SelectedDate { get => _selectedDate; set { _selectedDate = value; OnPropertyChanged(); } }
         public DateTime EarliestDate { get => _earliestDate; set { _earliestDate = value; OnPropertyChanged(); } }
@@ -60,10 +58,13 @@ namespace Covid_19_Tracker.ViewModel
 
         #region Command Methods
 
+        /// <summary>
+        /// Occcurs once the automatic update timer elapses, or the update button is pressed. Tries to update the database with the most recent data if possible. If there's no internet connection starts a timer that will retry the update every 30s.
+        /// </summary>
         private async void UpdateData()
         {
             Log.Information("Starting update.");
-            if (await _checkInternet.CheckForInternetConnection(1000))
+            if (await CheckInternetConnection.CheckForInternetConnection(1000))
             {
                 _lastUpdate = DateTime.Now;
                 await Task.Factory.StartNew(async () =>
@@ -71,20 +72,19 @@ namespace Covid_19_Tracker.ViewModel
                     ProgressText = "Hledám aktualizace...";
                     UpdateEnabled = ProgressBar = true;
 
-                    //GET WHO Vaccinations
-                    var listWho = _processData.CSVToListWHOCountries(_apiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv").Result).Result;
-                    await _dataToDb.InitializeCountries(listWho);
+                    //Get and save WHO Vaccinations + Country data
+                    var listWho = ProcessData.ProcessWhoVaccinated(ApiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv").Result).Result;
+                    await DataToDb.InitializeCountries(listWho);
+                    await DataToDb.SaveToDb(listWho);
 
-                    await _dataToDb.SavetoDb(listWho);
+                    //Get and save MZČR Summary
+                    await DataToDb.SavetoDb(ProcessData.ProcessMzcr(ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json").Result).Result);
 
-                    //GET MZČR Summary
-                    await _dataToDb.SavetoDb(_processData.JSONToDictMZCR(_apiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json").Result).Result);
-
-                    //GET WHO Infections
-                    await _dataToDb.SavetoDb(_processData.CSVToDictWHOCR(_apiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv").Result).Result);
+                    //Get and save WHO Infections
+                    await DataToDb.SavetoDb(ProcessData.ProcessWhoInfected(ApiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv").Result).Result);
 
                     await UpdateInfectedToDate();
-                    await SetPlot();
+                    await PlotInfectedData();
 
                     ProgressText = "Poslední aktualizace v " + _lastUpdate.ToString("HH:mm");
                     Log.Information("Update finished.");
@@ -97,8 +97,12 @@ namespace Covid_19_Tracker.ViewModel
             }
 
             ProgressBar = false;
+            UiEnabled = true;
         }
 
+        /// <summary>
+        /// Occurs once the date is changed in the DatePicker. Updates the DataGrid with the data relevant to that date.
+        /// </summary>
         private async void OnDateChanged()
         {
             await Task.Factory.StartNew(async () =>
@@ -112,17 +116,19 @@ namespace Covid_19_Tracker.ViewModel
         #region Constructor
         public MainViewModel()
         {
-            _dataToDb = new DataToDb();
-            _apiHandler = new ApiHandler();
-            _processData = new ProcessData();
-            _checkInternet = new CheckInternetConnection();
+            //Initialize model classes
+            //Initialize global variables
             PlotControl = new WpfPlot();
             SelectedDate = DateTime.Today.AddDays(-1);
             Infected = new ObservableCollection<Infected>();
-            RefreshCommand = new Command(UpdateData);
-            OnDateChangedCommand = new Command(OnDateChanged);
+            //Initialize View Commands
+            RefreshCommand = new Command(_ => true, _ => UpdateData());
+            OnDateChangedCommand = new Command(_ => true, _ => OnDateChanged());
+            //Set Progress Text
             ProgressText = "Poslední aktualizace v " + DateTime.Now.ToString("HH:mm");
+            //Set Update Timer
             SetUpdateTimer(600000);
+            //Call data update
             UpdateData();
         }
 
@@ -130,16 +136,19 @@ namespace Covid_19_Tracker.ViewModel
 
         #region Private Methods
 
-        private async Task SetPlot()
+        /// <summary>
+        /// Plots data with data from the Infected table in the database
+        /// </summary>
+        private async Task PlotInfectedData()
         {
             await using var ctx = new TrackerDbContext();
-            var dateTimes = await ctx.Infected.Select(x => x.Date).Distinct().ToListAsync();
+            var dateTimesMzcr = await ctx.Infected.Where(x => x.Source == "mzcr").Select(x => x.Date).Distinct().ToListAsync();
+            var dateTimesWho = await ctx.Infected.Where(x => x.Source == "who").Select(x => x.Date).Distinct().ToListAsync();
             var casesMzcr = await ctx.Infected.Where(x => x.Source == "mzcr").Select(x => (double)x.TotalCases).Distinct().ToListAsync();
             var casesWho = await ctx.Infected.Where(x => x.Source == "who").Select(x => (double)x.TotalCases).Distinct().ToListAsync();
-            var xs = dateTimes.Select(x => x.ToOADate()).ToArray();
             PlotControl.Plot.Clear();
-            PlotControl.Plot.AddScatter(xs, casesMzcr.ToArray(),Color.Crimson,label:"MZČR");
-            PlotControl.Plot.AddScatter(xs, casesWho.ToArray(), Color.DarkTurquoise, label: "WHO");
+            PlotControl.Plot.AddScatter(dateTimesMzcr.Select(x => x.ToOADate()).ToArray(), casesMzcr.ToArray(),Color.Crimson,label:"MZČR");
+            PlotControl.Plot.AddScatter(dateTimesWho.Select(x => x.ToOADate()).ToArray(), casesWho.ToArray(), Color.DarkTurquoise, label: "WHO");
             PlotControl.Plot.XAxis.DateTimeFormat(true);
             PlotControl.Plot.Legend();
             PlotControl.Plot.Title("Porovnání nakažených v ČR z dat MZČR a WHO");

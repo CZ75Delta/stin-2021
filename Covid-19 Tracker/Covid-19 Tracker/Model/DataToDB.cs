@@ -14,7 +14,7 @@ namespace Covid_19_Tracker.Model
         /// Metoda pro přidání jednoho záznamu do databáze
         /// </summary>
         /// <param name="dict">Dictionary se záznamem, který chceme přidat do databáze</param>
-        public async Task SavetoDb(Dictionary<string, string> dict)
+        public static async Task SavetoDb(Dictionary<string, string> dict)
         {
             var infected = new Infected();
             var vaccinated = new Vaccinated();
@@ -51,7 +51,7 @@ namespace Covid_19_Tracker.Model
         /// Metoda pro přidání více záznamů do databáze
         /// </summary>
         /// <param name="dict">List Dictionary se záznamy, které chceme přidat do databáze</param>
-        public async Task SavetoDb(IEnumerable<Dictionary<string, string>> list)
+        public static async Task SaveToDb(IEnumerable<Dictionary<string, string>> list)
         {
             await using var ctx = new TrackerDbContext();
 
@@ -90,7 +90,7 @@ namespace Covid_19_Tracker.Model
         /// Inicializuje databázi zemí
         /// </summary>
         /// <param name="list">WHO List zemí</param>
-        public async Task InitializeCountries(IEnumerable<Dictionary<string, string>> list)
+        public static async Task InitializeCountries(IEnumerable<Dictionary<string, string>> list)
         {
             await using var ctx = new TrackerDbContext();
             foreach (var record in list)
@@ -110,7 +110,7 @@ namespace Covid_19_Tracker.Model
         /// <summary>
         /// Aktualizuje data v databázi o populacích všech zemí
         /// </summary>
-        private async Task UpdatePopulation()
+        private static async Task UpdatePopulation()
         {
             await using var ctx = new TrackerDbContext();
             using var client = new WebClient();

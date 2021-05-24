@@ -16,6 +16,7 @@ namespace Covid_19_Tracker.View
         private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             EndDatePicker.Visibility = InfectedTab.IsSelected ? Visibility.Visible : Visibility.Hidden;
+            EndDatePickerLabel.Visibility = InfectedTab.IsSelected ? Visibility.Visible : Visibility.Hidden;
         }
     }
 }

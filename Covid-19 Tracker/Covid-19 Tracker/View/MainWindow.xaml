@@ -6,7 +6,7 @@
         xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
         xmlns:mvm="clr-namespace:Covid_19_Tracker.ViewModel"
         mc:Ignorable="d"
-        Title="Covid-19 Tracker" Height="450" Width="800" MinHeight="400" MinWidth="600">
+        Title="Covid-19 Tracker" Height="450" Width="800" MinHeight="400" MinWidth="600" IsEnabled="{Binding UiEnabled}">
     <Window.DataContext>
         <mvm:MainViewModel />
     </Window.DataContext>
@@ -34,7 +34,7 @@
                     <DataGrid Grid.Row="1" ItemsSource="{Binding Infected}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" CanUserResizeRows="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Zdroj Dat" Width="1*" Binding="{Binding Source}"/>
-                            <DataGridTextColumn Header="Celkový počet případů" Width="2*"  Binding="{Binding TotalCases}" />
+                            <DataGridTextColumn Header="Celkový počet případů" Width="2*"  Binding="{Binding TotalCases}"/>
                             <DataGridTextColumn Header="Nové případy" Width="2*"  Binding="{Binding NewCases}"/>
                         </DataGrid.Columns>
                     </DataGrid>
@@ -44,7 +44,7 @@
                 <Grid Background="#FFE5E5E5"/>
             </TabItem>
         </TabControl>
-        <TextBlock Text="Datum: " TextAlignment="Right" FontSize="12" Grid.Row="0" Grid.Column="3" Margin="0,3,0,0"/>
+        <TextBlock x:Name="EndDatePickerLabel" Text="Datum: " TextAlignment="Right" FontSize="12" Grid.Row="0" Grid.Column="3" Margin="0,3,0,0" Height="19"/>
         <DatePicker x:Name="EndDatePicker" Grid.Row="0" HorizontalAlignment="Center" Height="23" FirstDayOfWeek="Monday" SelectedDate="{Binding SelectedDate, Mode=TwoWay}" DisplayDateStart="{Binding EarliestDate}" DisplayDateEnd="{Binding LatestDate}" SelectedDateFormat="Short" Grid.Column="4">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectedDateChanged">
