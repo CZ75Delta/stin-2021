@@ -1,7 +1,4 @@
-﻿using System.Globalization;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using System.Windows;
 using Covid_19_Tracker.Model;
 using Microsoft.EntityFrameworkCore;
