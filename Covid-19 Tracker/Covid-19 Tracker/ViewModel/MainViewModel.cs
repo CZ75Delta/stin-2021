@@ -139,6 +139,7 @@ namespace Covid_19_Tracker.ViewModel
             var casesWho = await ctx.Infected.Where(x => x.Source == "who").Select(x => (double)x.TotalCases).Distinct().ToListAsync();
             var xs = dateTimes.Select(x => x.ToOADate()).ToArray();
             var ys = casesMzcr.ToArray();
+            PlotControl.Plot.Clear();
             PlotControl.Plot.AddScatter(xs, ys,Color.Crimson,label:"MZČR");
             ys = casesWho.ToArray();
             PlotControl.Plot.AddScatter(xs, ys, Color.DarkTurquoise, label: "WHO");
