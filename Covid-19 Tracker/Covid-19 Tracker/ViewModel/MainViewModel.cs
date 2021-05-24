@@ -133,16 +133,13 @@ namespace Covid_19_Tracker.ViewModel
         private async Task SetPlot()
         {
             await using var ctx = new TrackerDbContext();
-            // create data sample data
             var dateTimes = await ctx.Infected.Select(x => x.Date).Distinct().ToListAsync();
             var casesMzcr = await ctx.Infected.Where(x => x.Source == "mzcr").Select(x => (double)x.TotalCases).Distinct().ToListAsync();
             var casesWho = await ctx.Infected.Where(x => x.Source == "who").Select(x => (double)x.TotalCases).Distinct().ToListAsync();
             var xs = dateTimes.Select(x => x.ToOADate()).ToArray();
-            var ys = casesMzcr.ToArray();
             PlotControl.Plot.Clear();
-            PlotControl.Plot.AddScatter(xs, ys,Color.Crimson,label:"MZČR");
-            ys = casesWho.ToArray();
-            PlotControl.Plot.AddScatter(xs, ys, Color.DarkTurquoise, label: "WHO");
+            PlotControl.Plot.AddScatter(xs, casesMzcr.ToArray(),Color.Crimson,label:"MZČR");
+            PlotControl.Plot.AddScatter(xs, casesWho.ToArray(), Color.DarkTurquoise, label: "WHO");
             PlotControl.Plot.XAxis.DateTimeFormat(true);
             PlotControl.Plot.Legend();
             PlotControl.Plot.Title("Porovnání nakažených v ČR z dat MZČR a WHO");
