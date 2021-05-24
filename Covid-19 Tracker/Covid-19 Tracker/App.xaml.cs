@@ -1,4 +1,6 @@
 ﻿using System.Globalization;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Windows;
 using Covid_19_Tracker.Model;
@@ -14,12 +16,14 @@ namespace Covid_19_Tracker
     {
         protected override async void OnStartup(StartupEventArgs e)
         {
+            var ic = new IdentifyComputer();
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.File("log.txt", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10,
                     fileSizeLimitBytes: 52428800, rollOnFileSizeLimit: true)
                 .WriteTo.Telegram(
-                    "1896853074:AAGadAOmXiE90sTPlsxEyniV-f0WnU1CKlA", "-500972830", formatProvider: new CultureInfo("cs-CZ"))
+                    "1896853074:AAGadAOmXiE90sTPlsxEyniV-f0WnU1CKlA", "-500972830", applicationName: ic.GetIdentification().Result)
                 .CreateLogger();
+            Log.Information("Application started.");
             await Task.Factory.StartNew(async () =>
             {
                 //Migrate Database
