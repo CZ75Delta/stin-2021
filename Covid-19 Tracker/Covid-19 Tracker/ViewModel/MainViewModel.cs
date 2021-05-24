@@ -22,6 +22,7 @@ namespace Covid_19_Tracker.ViewModel
         private readonly ApiHandler _apiHandler;
         private readonly ProcessData _processData;
         private readonly DataToDb _dataToDb;
+        private readonly WpfPlot _plotControl;
         private readonly CheckInternetConnection _checkInternet;
         private Timer _updateTimer;
         private DispatcherTimer _retryTextTimer;
@@ -34,7 +35,6 @@ namespace Covid_19_Tracker.ViewModel
         private DateTime _selectedDate;
         private DateTime _earliestDate;
         private DateTime _latestDate;
-        private ScottPlot.WpfPlot _plotControl;
 
         #endregion
 
@@ -47,14 +47,14 @@ namespace Covid_19_Tracker.ViewModel
         public DateTime SelectedDate { get => _selectedDate; set { _selectedDate = value; OnPropertyChanged(); } }
         public DateTime EarliestDate { get => _earliestDate; set { _earliestDate = value; OnPropertyChanged(); } }
         public DateTime LatestDate { get => _latestDate; set { _latestDate = value; OnPropertyChanged(); } }
-        public ScottPlot.WpfPlot PlotControl { get => _plotControl; set { _plotControl = value; OnPropertyChanged(); } }
+        public WpfPlot PlotControl { get => _plotControl; private init { _plotControl = value; OnPropertyChanged(); } }
 
         #endregion
 
         #region Command Declarations
 
-        public Command RefreshCommand { get; private set; }
-        public Command OnDateChangedCommand { get; private set; }
+        public Command RefreshCommand { get; }
+        public Command OnDateChangedCommand { get; }
 
         #endregion
 
@@ -147,6 +147,9 @@ namespace Covid_19_Tracker.ViewModel
             PlotControl.Plot.YLabel("Celkový počet nakažených");
         }
 
+        /// <summary>
+        /// Updates the Infected UI from the information in the database.
+        /// </summary>
         private async Task UpdateInfectedToDate()
         {
             await using var ctx = new TrackerDbContext();
@@ -155,16 +158,23 @@ namespace Covid_19_Tracker.ViewModel
             EarliestDate = await ctx.Infected.MinAsync(r => r.Date);
         }
 
-        private void SetRetryTextTimer()
+        /// <summary>
+        /// Timer called every time there's no internet connection. Runs for 30 seconds by default, calls SetRetryTextTimerTick every second.
+        /// </summary>
+        /// <param name="interval">Time interval determining how often the timer elapses.</param>
+        private void SetRetryTextTimer(int interval = 30)
         {
             _retryTextTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1000) };
             _retryTextTimer.Tick += SetRetryTextTimerTick;
             _retryTextTimer.Start();
-            _retrySeconds = 30;
-            Log.Warning("Starting retry Timer.");
-            ProgressText = "Nelze se připojit k internetu, zkouším znovu za " + _retrySeconds + "s";
+            _retrySeconds = interval;
+            Log.Warning("Starting retry timer.");
+            ProgressText = "Nelze se připojit k internetu, zkouším znovu za " + interval + "s";
         }
 
+        /// <summary>
+        /// Tick event called for each 1s tick of SetRetryTextTimer. Calls the update method after the set time elapses.
+        /// </summary>
         private void SetRetryTextTimerTick(object sender, EventArgs e)
         {
             _retrySeconds -= 1;
@@ -175,6 +185,10 @@ namespace Covid_19_Tracker.ViewModel
             Log.Warning("Retrying update.");
         }
 
+        /// <summary>
+        /// Sets a Timer to call the update method every time the timer elapses.
+        /// </summary>
+        /// <param name="interval">Time interval determining how often the timer elapses.</param>
         private void SetUpdateTimer(double interval)
         {
             _updateTimer = new Timer(interval);
@@ -183,6 +197,9 @@ namespace Covid_19_Tracker.ViewModel
             _updateTimer.Enabled = true;
         }
 
+        /// <summary>
+        /// Timed event for SetUpdateTimer, calls the data update method when triggered after the timer elapses.
+        /// </summary>
         private void UpdateDataEvent(object sender, ElapsedEventArgs e)
         {
             UpdateData();
@@ -190,6 +207,10 @@ namespace Covid_19_Tracker.ViewModel
 
         #endregion
 
+        /// <summary>
+        /// Notifies the UI that a property has been changed and that it should be updated in the UI.
+        /// </summary>
+        /// <param name="propertyName">Property to update in the UI.</param>
         private new void OnPropertyChanged([CallerMemberName] string propertyName = "") { base.OnPropertyChanged(propertyName); }
     }
 }
