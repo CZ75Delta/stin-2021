@@ -120,12 +120,12 @@ namespace Covid_19_Tracker.ViewModel
 
                     await DataToDb.FixDailyInfected();
                     await UpdateInfectedToDate();
-
                     await UpdateCountries();
 
                     ProgressText = "Poslední aktualizace v " + _lastUpdate.ToString("HH:mm");
                     Log.Information("Update finished.");
                 });
+                
             }
             else
             {
@@ -284,24 +284,21 @@ namespace Covid_19_Tracker.ViewModel
         private async Task UpdateCountries()
         {
             await using var ctx = new TrackerDbContext();
-            Collection<Country> countries_data = new Collection<Country>(await ctx.Countries.ToListAsync());
+            List<CountryVaccination> countries = new List<CountryVaccination>();
 
-            foreach (Country country in countries_data)
+            foreach (Country country in ctx.Countries)
             {
                 var vaccinated = await ctx.Vaccinated.Where(x => x.Id == country.Id).Select(x => (double)x.TotalVaccinations).Distinct().ToListAsync();
-                await Task.WhenAll();
-                if (vaccinated[0] == null)
+                if (vaccinated[0] == 0.0)
                 {
-                    Countries.Add(new CountryVaccination(country.Name, country.Population, 0));
+                    countries.Add(new CountryVaccination(country.Name, country.Population, 0));
                 }
                 else
                 {
-                    Countries.Add(new CountryVaccination(country.Name, country.Population, vaccinated[0]));
+                    countries.Add(new CountryVaccination(country.Name, country.Population, vaccinated[0]));
                 }
-                Countries = new ObservableCollection<CountryVaccination>();
-                
             }
-            await Task.WhenAll();
+            Countries = new ObservableCollection<CountryVaccination>(countries);
         }
 
 
