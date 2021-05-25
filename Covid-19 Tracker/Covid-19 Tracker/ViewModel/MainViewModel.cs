@@ -19,7 +19,8 @@ namespace Covid_19_Tracker.ViewModel
     {
         #region Global Variables
 
-        private readonly WpfPlot _plotControl;
+        private readonly WpfPlot _infectedWpfPlot;
+        private readonly WpfPlot _vaccinatedWpfPlot;
         private Timer _updateTimer;
         private DispatcherTimer _retryTextTimer;
         private int _retrySeconds;
@@ -45,7 +46,8 @@ namespace Covid_19_Tracker.ViewModel
         public DateTime SelectedDate { get => _selectedDate; set { _selectedDate = value; OnPropertyChanged(); } }
         public DateTime EarliestDate { get => _earliestDate; set { _earliestDate = value; OnPropertyChanged(); } }
         public DateTime LatestDate { get => _latestDate; set { _latestDate = value; OnPropertyChanged(); } }
-        public WpfPlot PlotControl { get => _plotControl; private init { _plotControl = value; OnPropertyChanged(); } }
+        public WpfPlot InfectedWpfPlot { get => _infectedWpfPlot; private init { _infectedWpfPlot = value; OnPropertyChanged(); } }
+        public WpfPlot VaccinatedWpfPlot { get => _vaccinatedWpfPlot; private init { _vaccinatedWpfPlot = value; OnPropertyChanged(); } }
 
         #endregion
 
@@ -116,9 +118,9 @@ namespace Covid_19_Tracker.ViewModel
         #region Constructor
         public MainViewModel()
         {
-            //Initialize model classes
             //Initialize global variables
-            PlotControl = new WpfPlot();
+            InfectedWpfPlot = new WpfPlot();
+            VaccinatedWpfPlot = new WpfPlot();
             SelectedDate = DateTime.Today.AddDays(-1);
             Infected = new ObservableCollection<Infected>();
             //Initialize View Commands
@@ -146,14 +148,14 @@ namespace Covid_19_Tracker.ViewModel
             var dateTimesWho = await ctx.Infected.Where(x => x.Source == "who").Select(x => x.Date).Distinct().ToListAsync();
             var casesMzcr = await ctx.Infected.Where(x => x.Source == "mzcr").Select(x => (double)x.TotalCases).Distinct().ToListAsync();
             var casesWho = await ctx.Infected.Where(x => x.Source == "who").Select(x => (double)x.TotalCases).Distinct().ToListAsync();
-            PlotControl.Plot.Clear();
-            PlotControl.Plot.AddScatter(dateTimesMzcr.Select(x => x.ToOADate()).ToArray(), casesMzcr.ToArray(),Color.Crimson,label:"MZČR");
-            PlotControl.Plot.AddScatter(dateTimesWho.Select(x => x.ToOADate()).ToArray(), casesWho.ToArray(), Color.DarkTurquoise, label: "WHO");
-            PlotControl.Plot.XAxis.DateTimeFormat(true);
-            PlotControl.Plot.Legend();
-            PlotControl.Plot.Title("Porovnání nakažených v ČR z dat MZČR a WHO");
-            PlotControl.Plot.XLabel("Datum");
-            PlotControl.Plot.YLabel("Celkový počet nakažených");
+            InfectedWpfPlot.Plot.Clear();
+            InfectedWpfPlot.Plot.AddScatter(dateTimesMzcr.Select(x => x.ToOADate()).ToArray(), casesMzcr.ToArray(),Color.Crimson,label:"MZČR");
+            InfectedWpfPlot.Plot.AddScatter(dateTimesWho.Select(x => x.ToOADate()).ToArray(), casesWho.ToArray(), Color.DarkTurquoise, label: "WHO");
+            InfectedWpfPlot.Plot.XAxis.DateTimeFormat(true);
+            InfectedWpfPlot.Plot.Legend();
+            InfectedWpfPlot.Plot.Title("Porovnání nakažených v ČR z dat MZČR a WHO");
+            InfectedWpfPlot.Plot.XLabel("Datum");
+            InfectedWpfPlot.Plot.YLabel("Celkový počet nakažených");
         }
 
         /// <summary>
