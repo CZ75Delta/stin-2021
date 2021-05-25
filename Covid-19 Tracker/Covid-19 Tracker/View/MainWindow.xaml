@@ -56,15 +56,14 @@
                             <DataGridTextColumn Header="Seřadit státy" Width="1*" Binding="{Binding Name}"/>
                         </DataGrid.Columns>
                     </DataGrid>
-                    
-                    <DataGrid Grid.Column="1" Grid.Row="1" ItemsSource="{Binding CountriesPicked}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" CanUserResizeRows="False">
+
+                    <DataGrid Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Countries}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" CanUserResizeRows="False">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Stát" Width="1*" Binding="{Binding Name}"/>
-                            <DataGridTextColumn Header="Očkování" Width="1*" Binding="{Binding Name}"/>
-                            <DataGridTextColumn Header="Proočkovanost" Width="1*" Binding="{Binding Name}"/>
+                            <DataGridTextColumn Header="Stát" Width="1*" Binding="{Binding Name}" />
+                            <DataGridTextColumn Header="Očkování" Width="1*" Binding="{Binding VaccinatedCounter}"/>
+                            <DataGridTextColumn Header="Proočkovanost" Width="1*" Binding="{Binding VaccinatedPercent}"/>
                         </DataGrid.Columns>
                     </DataGrid>
-                    
                 </Grid>
             </TabItem>
         </TabControl>
