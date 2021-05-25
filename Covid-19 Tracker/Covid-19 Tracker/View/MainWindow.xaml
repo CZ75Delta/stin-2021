@@ -31,7 +31,7 @@
                         <RowDefinition Height="65"/>
                     </Grid.RowDefinitions>
                     <ContentControl Grid.Row="0" Grid.Column="0" x:Name="InfectedPlot" Content="{Binding PlotControl}"/>
-                    <DataGrid Grid.Row="1" ItemsSource="{Binding Infected}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" CanUserResizeRows="False">
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding Infected}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" CanUserResizeRows="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Zdroj Dat" Width="1*" Binding="{Binding Source}"/>
                             <DataGridTextColumn Header="Celkový počet případů" Width="2*"  Binding="{Binding TotalCases}"/>

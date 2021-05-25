@@ -116,7 +116,6 @@ namespace Covid_19_Tracker.ViewModel
 
                     await DataToDb.FixDailyInfected();
                     await UpdateInfectedToDate();
-                    await PlotInfectedData();
 
                     ProgressText = "Poslední aktualizace v " + _lastUpdate.ToString("HH:mm");
                     Log.Information("Update finished.");
