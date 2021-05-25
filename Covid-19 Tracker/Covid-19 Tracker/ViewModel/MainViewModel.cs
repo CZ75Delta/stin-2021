@@ -35,6 +35,7 @@ namespace Covid_19_Tracker.ViewModel
         private bool _uiEnabled;
         private bool _updating;
         private ObservableCollection<Infected> _infected;
+        private ObservableCollection<Country> _countries;
         private DateTime _lastUpdate;
         private DateTime _selectedDate;
         private DateTime _earliestDate;
@@ -53,6 +54,8 @@ namespace Covid_19_Tracker.ViewModel
         public bool UpdateEnabled { get => _updateEnabled; private set { _updateEnabled = value; OnPropertyChanged(); } }
         public bool UiEnabled { get => _uiEnabled; private set { _uiEnabled = value; OnPropertyChanged(); } }
         public ObservableCollection<Infected> Infected { get => _infected; private set { _infected = value; OnPropertyChanged(); } }
+        public ObservableCollection<Country> Countries { get => _countries; private set { _countries = value; OnPropertyChanged(); } }
+
         public DateTime SelectedDate { get => _selectedDate; set { _selectedDate = value; OnPropertyChanged(); } }
         public DateTime EarliestDate { get => _earliestDate; set { _earliestDate = value; OnPropertyChanged(); } }
         public DateTime LatestDate { get => _latestDate; set { _latestDate = value; OnPropertyChanged(); } }
@@ -118,6 +121,8 @@ namespace Covid_19_Tracker.ViewModel
                     await DataToDb.FixDailyInfected();
                     await UpdateInfectedToDate();
 
+                    await UpdateCountries();
+
                     ProgressText = "Poslední aktualizace v " + _lastUpdate.ToString("HH:mm");
                     Log.Information("Update finished.");
                 });
@@ -154,6 +159,7 @@ namespace Covid_19_Tracker.ViewModel
             Infected = new ObservableCollection<Infected>();
             //Initialize Plot Controls
             PlotControl = new WpfPlot{Configuration = { DoubleClickBenchmark = false}};
+            Countries = new ObservableCollection<Country>();
             //Initialize View Commands
             RefreshCommand = new Command(_ => true, _ => UpdateData());
             OnDateChangedCommand = new Command(_ => true, _ => OnDateChanged());
@@ -273,6 +279,12 @@ namespace Covid_19_Tracker.ViewModel
             Infected = new ObservableCollection<Infected>(await ctx.Infected.Where(x => x.Date.Date == SelectedDate.Date).ToListAsync());
             LatestDate = await ctx.Infected.MaxAsync(r => r.Date);
             EarliestDate = await ctx.Infected.MinAsync(r => r.Date);
+        }
+
+        private async Task UpdateCountries()
+        {
+            await using var ctx = new TrackerDbContext();
+            Countries = new ObservableCollection<Country>(await ctx.Countries.ToListAsync());
         }
 
         /// <summary>
