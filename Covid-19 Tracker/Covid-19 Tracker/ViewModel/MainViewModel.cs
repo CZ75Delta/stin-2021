@@ -184,14 +184,7 @@ namespace Covid_19_Tracker.ViewModel
             foreach (Country country in ctx.Countries)
             {
                 var vaccinated = await ctx.Vaccinated.Where(x => x.Id == country.Id).Select(x => (double)x.TotalVaccinations).Distinct().ToListAsync();
-                if (vaccinated[0] == 0.0)
-                {
-                    countries.Add(new CountryVaccination(country.Name, country.Population, 0));
-                }
-                else
-                {
-                    countries.Add(new CountryVaccination(country.Name, country.Population, vaccinated[0]));
-                }
+                countries.Add(new CountryVaccination(country.Name, country.Population, vaccinated[0]));
             }
             Countries = new ObservableCollection<CountryVaccination>(countries);
         }
