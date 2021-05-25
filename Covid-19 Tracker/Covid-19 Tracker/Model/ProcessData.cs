@@ -29,6 +29,25 @@ namespace Covid_19_Tracker.Model
             return await Task.FromResult(dict);
         }
 
+        public static async Task<Dictionary<string, string>> ProcessMzcrDate(string json, DateTime date)
+        {
+            var value = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(json);
+            var dict = new Dictionary<string, string>();
+            if (value == null) return await Task.FromResult(dict);
+            foreach (var entry in value["data"])
+            {
+                if (entry["datum"] == date.ToString("yyyy-MM-dd"))
+                {
+                    dict.Add("Date", date.ToString("yyyy-MM-dd"));
+                    dict.Add("Source", "mzcr");
+                    dict.Add("Country", "Czechia");
+                    dict.Add("TotalCases", entry["kumulativni_pocet_nakazenych"].ToString());
+                    dict.Add("NewCases", 0.ToString());
+                }
+            }
+            return await Task.FromResult(dict);
+        }
+
         /// <summary>
         /// Metoda pro vybrání dat z CSV WHO CZ
         /// </summary>
@@ -48,6 +67,28 @@ namespace Covid_19_Tracker.Model
                 var dict = new Dictionary<string, string>
                 {
                     {"Date", dateYesterday},
+                    {"Source", "who"},
+                    {"Country", "Czechia"},
+                    {"TotalCases", data[5]},
+                    {"NewCases", data[4]}
+                };
+                return await Task.FromResult(dict);
+            }
+
+            return null;
+        }
+
+        public static async Task<Dictionary<string, string>> ProcessWhoInfected(string csv, DateTime date)
+        {
+            var lines = csv.Split('\n');
+            foreach (var line in lines)
+            {
+                if (!line.StartsWith(date.ToString("yyyy-MM-dd"))) continue;
+                if (!line.Contains("CZ")) continue;
+                var data = line.Split(',');
+                var dict = new Dictionary<string, string>
+                {
+                    {"Date", date.ToString("yyyy-MM-dd")},
                     {"Source", "who"},
                     {"Country", "Czechia"},
                     {"TotalCases", data[5]},

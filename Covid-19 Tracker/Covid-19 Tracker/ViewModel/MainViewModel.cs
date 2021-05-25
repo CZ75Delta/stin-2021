@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
@@ -40,8 +41,8 @@ namespace Covid_19_Tracker.ViewModel
         private DateTime _latestDate;
         private int _mzcrLastHighlightedIndex = -1;
         private int _whoLastHighlightedIndex = -1;
-        private double[] _mzcrValues;
-        private double[] _whoValues;
+        private double[] _mzcrValues = new double[730];
+        private double[] _whoValues = new double[730];
 
         #endregion
 
@@ -91,9 +92,19 @@ namespace Covid_19_Tracker.ViewModel
 
                     //Get and save MZČR Summary
                     await DataToDb.SavetoDb(ProcessData.ProcessMzcr(ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json").Result).Result);
+                    var mzcrHistory = await ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/nakazeni-vyleceni-umrti-testy.json");
+                    foreach (var missingDate in GetMissingDates().Result)
+                    {
+                        await DataToDb.SavetoDb(ProcessData.ProcessMzcrDate(mzcrHistory, missingDate).Result);
+                    }
 
                     //Get and save WHO Infections
-                    await DataToDb.SavetoDb(ProcessData.ProcessWhoInfected(ApiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv").Result).Result);
+                    var whoInfections = await ApiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv");
+                    await DataToDb.SavetoDb(ProcessData.ProcessWhoInfected(whoInfections).Result);
+                    foreach (var missingDate in GetMissingDates().Result)
+                    {
+                        await DataToDb.SavetoDb(ProcessData.ProcessWhoInfected(whoInfections, missingDate).Result);
+                    }
 
                     await UpdateInfectedToDate();
                     await PlotInfectedData();
@@ -150,11 +161,20 @@ namespace Covid_19_Tracker.ViewModel
 
         #region Private Methods
 
+        private async Task<List<DateTime>> GetMissingDates()
+        {
+            await using var ctx = new TrackerDbContext();
+            var latestDate = await ctx.Infected.MaxAsync(r => r.Date);
+            var earliestDate = await ctx.Infected.MinAsync(r => r.Date);
+            var range = Enumerable.Range(0, (int)(latestDate - earliestDate).TotalDays + 1).Select(i => earliestDate.AddDays(i));
+            return range.Except(await ctx.Infected.Where(x => x.Source == "mzcr").OrderBy(x => x.Date).Select(x => x.Date).ToListAsync()).ToList();
+        }
+
         private void PlotFactory()
         {
             using var ctx = new TrackerDbContext();
-            _mzcrValues = ctx.Infected.Where(x => x.Source == "mzcr").Select(x => (double)x.TotalCases).Distinct().ToArray();
-            _whoValues = ctx.Infected.Where(x => x.Source == "who").Select(x => (double)x.TotalCases).Distinct().ToArray();
+            Array.Copy(ctx.Infected.Where(x => x.Source == "mzcr").OrderBy(x => x.Date).Select(x => (double)x.TotalCases).ToArray(),_mzcrValues, 0);
+            Array.Copy(ctx.Infected.Where(x => x.Source == "who").OrderBy(x => x.Date).Select(x => (double)x.TotalCases).ToArray(),_whoValues, 0);
             _mzcrPlot = PlotControl.Plot.AddSignal(_mzcrValues, 1, Color.Crimson, label: "MZČR");
             _whoPlot = PlotControl.Plot.AddSignal(_whoValues, 1, Color.DarkTurquoise, "WHO");
             _mzcrPlot.OffsetX = ctx.Infected.MinAsync(r => r.Date).Result.ToOADate();
@@ -187,20 +207,15 @@ namespace Covid_19_Tracker.ViewModel
 
         private void PlotControl_MouseMove(object sender, EventArgs e)
         {
-            // determine point nearest the cursor
             var (mouseCoordinateX, _) = PlotControl.GetMouseCoordinates();
             var (mzcrPointX, mzcrPointY, mzcrPointIndex) = _mzcrPlot.GetPointNearestX(mouseCoordinateX);
             var (whoPointX, whoPointY, whoPointIndex) = _whoPlot.GetPointNearestX(mouseCoordinateX);
-
-            // place the highlight over the point of interest
             _highlightedPointMzcr.Xs[0] = mzcrPointX;
             _highlightedPointMzcr.Ys[0] = mzcrPointY;
             _highlightedPointMzcr.IsVisible = true;
             _highlightedPointWho.Xs[0] = whoPointX;
             _highlightedPointWho.Ys[0] = whoPointY;
             _highlightedPointWho.IsVisible = true;
-
-            // render if the highlighted point chnaged
             if (_mzcrLastHighlightedIndex == mzcrPointIndex && _whoLastHighlightedIndex == whoPointIndex) return;
             _mzcrLastHighlightedIndex = mzcrPointIndex;
             _whoLastHighlightedIndex = whoPointIndex;
@@ -213,12 +228,14 @@ namespace Covid_19_Tracker.ViewModel
         private async Task PlotInfectedData()
         {
             await using var ctx = new TrackerDbContext();
-            var casesMzcr = await ctx.Infected.Where(x => x.Source == "mzcr").Select(x => (double)x.TotalCases).Distinct().ToListAsync();
-            var casesWho = await ctx.Infected.Where(x => x.Source == "who").Select(x => (double)x.TotalCases).Distinct().ToListAsync();
+            var casesMzcr = await ctx.Infected.Where(x => x.Source == "mzcr").OrderBy(x => x.Date).Select(x => (double)x.TotalCases).ToListAsync();
+            var casesWho = await ctx.Infected.Where(x => x.Source == "who").OrderBy(x => x.Date).Select(x => (double)x.TotalCases).ToListAsync();
             Array.Clear(_mzcrValues,0, _mzcrValues.Length);
-            Array.Clear(_whoValues, 0, _mzcrValues.Length);
+            Array.Clear(_whoValues, 0, _whoValues.Length);
             Array.Copy(casesMzcr.ToArray(), _mzcrValues, casesMzcr.Count);
             Array.Copy(casesWho.ToArray(), _whoValues, casesWho.Count);
+            _mzcrPlot.MaxRenderIndex = Array.FindLastIndex(_mzcrValues, value => value != 0);
+            _whoPlot.MaxRenderIndex = Array.FindLastIndex(_whoValues, value => value != 0);
             PlotControl.Plot.AxisAuto();
             PlotControl.Plot.Render();
         }
