@@ -46,6 +46,12 @@
                         <ColumnDefinition Width="2*"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
+                    <DataGrid Grid.Column="1" ItemsSource="{Binding Countries}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" CanUserResizeRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding Name}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    
                 </Grid>
             </TabItem>
         </TabControl>
