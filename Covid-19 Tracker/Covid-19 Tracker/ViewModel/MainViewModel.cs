@@ -56,7 +56,8 @@ namespace Covid_19_Tracker.ViewModel
         public DateTime SelectedDate { get => _selectedDate; set { _selectedDate = value; OnPropertyChanged(); } }
         public DateTime EarliestDate { get => _earliestDate; set { _earliestDate = value; OnPropertyChanged(); } }
         public DateTime LatestDate { get => _latestDate; set { _latestDate = value; OnPropertyChanged(); } }
-        public WpfPlot PlotControl { get => _plotControl; private init { _plotControl = value; OnPropertyChanged(); } }
+        public WpfPlot InfectedWpfPlot { get => _infectedWpfPlot; private init { _infectedWpfPlot = value; OnPropertyChanged(); } }
+        public WpfPlot VaccinatedWpfPlot { get => _vaccinatedWpfPlot; private init { _vaccinatedWpfPlot = value; OnPropertyChanged(); } }
 
         #endregion
 
