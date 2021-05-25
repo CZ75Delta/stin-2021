@@ -107,6 +107,24 @@ namespace Covid_19_Tracker.Model
             await UpdatePopulation();
         }
 
+        public static async Task FixDailyInfected()
+        {
+            await using var ctx = new TrackerDbContext();
+            foreach (var record in ctx.Infected)
+            {
+                if (record.NewCases == 0)
+                {
+                    var previousRecord = ctx.Infected.FirstOrDefault(x =>
+                        x.Source == record.Source && x.Date.Equals(record.Date.AddDays(-1)));
+                    if (previousRecord != null)
+                    {
+                        record.NewCases = record.TotalCases - previousRecord.TotalCases;
+                    }
+                }
+            }
+            await ctx.SaveChangesAsync();
+        }
+
         /// <summary>
         /// Aktualizuje data v databázi o populacích všech zemí
         /// </summary>

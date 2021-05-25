@@ -92,20 +92,29 @@ namespace Covid_19_Tracker.ViewModel
 
                     //Get and save MZČR Summary
                     await DataToDb.SavetoDb(ProcessData.ProcessMzcr(ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json").Result).Result);
-                    var mzcrHistory = await ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/nakazeni-vyleceni-umrti-testy.json");
-                    foreach (var missingDate in GetMissingDates().Result)
+                    var mzcrMissing = GetMzcrMissingDates().Result;
+                    if (mzcrMissing.Count > 0)
                     {
-                        await DataToDb.SavetoDb(ProcessData.ProcessMzcrDate(mzcrHistory, missingDate).Result);
+                        var mzcrHistory = await ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/nakazeni-vyleceni-umrti-testy.json");
+                        foreach (var missingDate in mzcrMissing)
+                        {
+                            await DataToDb.SavetoDb(ProcessData.ProcessMzcrDate(mzcrHistory, missingDate).Result);
+                        }
                     }
 
                     //Get and save WHO Infections
                     var whoInfections = await ApiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv");
                     await DataToDb.SavetoDb(ProcessData.ProcessWhoInfected(whoInfections).Result);
-                    foreach (var missingDate in GetMissingDates().Result)
+                    var whoMissing = GetWhoMissingDates().Result;
+                    if (whoMissing.Count > 0)
                     {
-                        await DataToDb.SavetoDb(ProcessData.ProcessWhoInfected(whoInfections, missingDate).Result);
+                        foreach (var missingDate in whoMissing)
+                        {
+                            await DataToDb.SavetoDb(ProcessData.ProcessWhoInfected(whoInfections, missingDate).Result);
+                        }
                     }
 
+                    await DataToDb.FixDailyInfected();
                     await UpdateInfectedToDate();
                     await PlotInfectedData();
 
@@ -161,13 +170,21 @@ namespace Covid_19_Tracker.ViewModel
 
         #region Private Methods
 
-        private async Task<List<DateTime>> GetMissingDates()
+        private async Task<List<DateTime>> GetMzcrMissingDates()
         {
             await using var ctx = new TrackerDbContext();
-            var latestDate = await ctx.Infected.MaxAsync(r => r.Date);
-            var earliestDate = await ctx.Infected.MinAsync(r => r.Date);
+            var latestDate = await ctx.Infected.Where(x => x.Source == "mzcr").MaxAsync(r => r.Date);
+            var earliestDate = await ctx.Infected.Where(x => x.Source == "mzcr").MinAsync(r => r.Date);
             var range = Enumerable.Range(0, (int)(latestDate - earliestDate).TotalDays + 1).Select(i => earliestDate.AddDays(i));
             return range.Except(await ctx.Infected.Where(x => x.Source == "mzcr").OrderBy(x => x.Date).Select(x => x.Date).ToListAsync()).ToList();
+        }
+        private async Task<List<DateTime>> GetWhoMissingDates()
+        {
+            await using var ctx = new TrackerDbContext();
+            var latestDate = await ctx.Infected.Where(x => x.Source == "who").MaxAsync(r => r.Date);
+            var earliestDate = await ctx.Infected.Where(x => x.Source == "who").MinAsync(r => r.Date);
+            var range = Enumerable.Range(0, (int)(latestDate - earliestDate).TotalDays + 1).Select(i => earliestDate.AddDays(i));
+            return range.Except(await ctx.Infected.Where(x => x.Source == "who").OrderBy(x => x.Date).Select(x => x.Date).ToListAsync()).ToList();
         }
 
         private void PlotFactory()
