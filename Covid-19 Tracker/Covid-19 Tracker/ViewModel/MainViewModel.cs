@@ -84,7 +84,6 @@ namespace Covid_19_Tracker.ViewModel
                     await DataToDb.SavetoDb(ProcessData.ProcessWhoInfected(ApiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv").Result).Result);
 
                     await UpdateInfectedToDate();
-                    await PlotInfectedData();
 
                     ProgressText = "Poslední aktualizace v " + _lastUpdate.ToString("HH:mm");
                     Log.Information("Update finished.");
@@ -98,6 +97,7 @@ namespace Covid_19_Tracker.ViewModel
 
             ProgressBar = false;
             UiEnabled = true;
+            await PlotInfectedData();
         }
 
         /// <summary>
