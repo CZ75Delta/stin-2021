@@ -10,6 +10,7 @@ using Covid_19_Tracker.Base;
 using Covid_19_Tracker.Model;
 using Microsoft.EntityFrameworkCore;
 using ScottPlot;
+using ScottPlot.Plottable;
 using Serilog;
 
 
@@ -20,6 +21,10 @@ namespace Covid_19_Tracker.ViewModel
         #region Global Variables
 
         private readonly WpfPlot _plotControl;
+        private SignalPlot _mzcrPlot;
+        private SignalPlot _whoPlot;
+        private ScatterPlot _highlightedPointWho;
+        private ScatterPlot _highlightedPointMzcr;
         private Timer _updateTimer;
         private DispatcherTimer _retryTextTimer;
         private int _retrySeconds;
@@ -27,11 +32,16 @@ namespace Covid_19_Tracker.ViewModel
         private bool _progressBar;
         private bool _updateEnabled;
         private bool _uiEnabled;
+        private bool _updating;
         private ObservableCollection<Infected> _infected;
         private DateTime _lastUpdate;
         private DateTime _selectedDate;
         private DateTime _earliestDate;
         private DateTime _latestDate;
+        private int _mzcrLastHighlightedIndex = -1;
+        private int _whoLastHighlightedIndex = -1;
+        private double[] _mzcrValues;
+        private double[] _whoValues;
 
         #endregion
 
@@ -63,6 +73,8 @@ namespace Covid_19_Tracker.ViewModel
         /// </summary>
         private async void UpdateData()
         {
+            if (_updating) return;
+            _updating = true;
             Log.Information("Starting update.");
             if (await CheckInternetConnection.CheckForInternetConnection(1000))
             {
@@ -98,6 +110,7 @@ namespace Covid_19_Tracker.ViewModel
 
             ProgressBar = false;
             UiEnabled = true;
+            _updating = false;
         }
 
         /// <summary>
@@ -116,11 +129,12 @@ namespace Covid_19_Tracker.ViewModel
         #region Constructor
         public MainViewModel()
         {
-            //Initialize model classes
             //Initialize global variables
-            PlotControl = new WpfPlot();
             SelectedDate = DateTime.Today.AddDays(-1);
             Infected = new ObservableCollection<Infected>();
+            //Initialize Plot Controls
+            PlotControl = new WpfPlot();
+            PlotFactory();
             //Initialize View Commands
             RefreshCommand = new Command(_ => true, _ => UpdateData());
             OnDateChangedCommand = new Command(_ => true, _ => OnDateChanged());
@@ -136,24 +150,77 @@ namespace Covid_19_Tracker.ViewModel
 
         #region Private Methods
 
+        private void PlotFactory()
+        {
+            using var ctx = new TrackerDbContext();
+            _mzcrValues = ctx.Infected.Where(x => x.Source == "mzcr").Select(x => (double)x.TotalCases).Distinct().ToArray();
+            _whoValues = ctx.Infected.Where(x => x.Source == "who").Select(x => (double)x.TotalCases).Distinct().ToArray();
+            _mzcrPlot = PlotControl.Plot.AddSignal(_mzcrValues, 1, Color.Crimson, label: "MZČR");
+            _whoPlot = PlotControl.Plot.AddSignal(_whoValues, 1, Color.DarkTurquoise, "WHO");
+            _mzcrPlot.OffsetX = ctx.Infected.MinAsync(r => r.Date).Result.ToOADate();
+            _whoPlot.OffsetX = ctx.Infected.MinAsync(r => r.Date).Result.ToOADate();
+            PlotControl.MouseDoubleClick += PlotControl_DoubleClick;
+            PlotControl.MouseMove += PlotControl_MouseMove;
+            PlotControl.Plot.XAxis.DateTimeFormat(true);
+            PlotControl.Plot.XLabel("Datum");
+            PlotControl.Plot.YLabel("Celkový počet nakažených");
+            PlotControl.Plot.Title("Porovnání nakažených v ČR z dat MZČR a WHO");
+            PlotControl.Plot.AxisAuto();
+            PlotControl.Plot.Legend();
+            _highlightedPointMzcr = PlotControl.Plot.AddPoint(0, 0);
+            _highlightedPointMzcr.Color = Color.Green;
+            _highlightedPointMzcr.MarkerSize = 10;
+            _highlightedPointMzcr.MarkerShape = MarkerShape.openCircle;
+            _highlightedPointMzcr.IsVisible = false;
+            _highlightedPointWho = PlotControl.Plot.AddPoint(0, 0);
+            _highlightedPointWho.Color = Color.Green;
+            _highlightedPointWho.MarkerSize = 10;
+            _highlightedPointWho.MarkerShape = MarkerShape.openCircle;
+            _highlightedPointWho.IsVisible = false;
+        }
+
+        private async void PlotControl_DoubleClick(object sender, EventArgs e)
+        {
+            SelectedDate = DateTime.FromOADate(_highlightedPointWho.Xs[0]);
+            await UpdateInfectedToDate();
+        }
+
+        private void PlotControl_MouseMove(object sender, EventArgs e)
+        {
+            // determine point nearest the cursor
+            var (mouseCoordinateX, _) = PlotControl.GetMouseCoordinates();
+            var (mzcrPointX, mzcrPointY, mzcrPointIndex) = _mzcrPlot.GetPointNearestX(mouseCoordinateX);
+            var (whoPointX, whoPointY, whoPointIndex) = _whoPlot.GetPointNearestX(mouseCoordinateX);
+
+            // place the highlight over the point of interest
+            _highlightedPointMzcr.Xs[0] = mzcrPointX;
+            _highlightedPointMzcr.Ys[0] = mzcrPointY;
+            _highlightedPointMzcr.IsVisible = true;
+            _highlightedPointWho.Xs[0] = whoPointX;
+            _highlightedPointWho.Ys[0] = whoPointY;
+            _highlightedPointWho.IsVisible = true;
+
+            // render if the highlighted point chnaged
+            if (_mzcrLastHighlightedIndex == mzcrPointIndex && _whoLastHighlightedIndex == whoPointIndex) return;
+            _mzcrLastHighlightedIndex = mzcrPointIndex;
+            _whoLastHighlightedIndex = whoPointIndex;
+            PlotControl.Render();
+        }
+
         /// <summary>
         /// Plots data with data from the Infected table in the database
         /// </summary>
         private async Task PlotInfectedData()
         {
             await using var ctx = new TrackerDbContext();
-            var dateTimesMzcr = await ctx.Infected.Where(x => x.Source == "mzcr").Select(x => x.Date).Distinct().ToListAsync();
-            var dateTimesWho = await ctx.Infected.Where(x => x.Source == "who").Select(x => x.Date).Distinct().ToListAsync();
             var casesMzcr = await ctx.Infected.Where(x => x.Source == "mzcr").Select(x => (double)x.TotalCases).Distinct().ToListAsync();
             var casesWho = await ctx.Infected.Where(x => x.Source == "who").Select(x => (double)x.TotalCases).Distinct().ToListAsync();
-            PlotControl.Plot.Clear();
-            PlotControl.Plot.AddScatter(dateTimesMzcr.Select(x => x.ToOADate()).ToArray(), casesMzcr.ToArray(),Color.Crimson,label:"MZČR");
-            PlotControl.Plot.AddScatter(dateTimesWho.Select(x => x.ToOADate()).ToArray(), casesWho.ToArray(), Color.DarkTurquoise, label: "WHO");
-            PlotControl.Plot.XAxis.DateTimeFormat(true);
-            PlotControl.Plot.Legend();
-            PlotControl.Plot.Title("Porovnání nakažených v ČR z dat MZČR a WHO");
-            PlotControl.Plot.XLabel("Datum");
-            PlotControl.Plot.YLabel("Celkový počet nakažených");
+            Array.Clear(_mzcrValues,0, _mzcrValues.Length);
+            Array.Clear(_whoValues, 0, _mzcrValues.Length);
+            Array.Copy(casesMzcr.ToArray(), _mzcrValues, casesMzcr.Count);
+            Array.Copy(casesWho.ToArray(), _whoValues, casesWho.Count);
+            PlotControl.Plot.AxisAuto();
+            PlotControl.Plot.Render();
         }
 
         /// <summary>
