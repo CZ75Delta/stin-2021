@@ -109,6 +109,8 @@ namespace Covid_19_Tracker.ViewModel
                     await UpdateInfectedToDate();
                     await PlotInfectedData();
 
+                    UpdateCountries();
+
                     ProgressText = "Poslední aktualizace v " + _lastUpdate.ToString("HH:mm");
                     Log.Information("Update finished.");
                 });
@@ -249,6 +251,24 @@ namespace Covid_19_Tracker.ViewModel
             Infected = new ObservableCollection<Infected>(await ctx.Infected.Where(x => x.Date.Date == SelectedDate.Date).ToListAsync());
             LatestDate = await ctx.Infected.MaxAsync(r => r.Date);
             EarliestDate = await ctx.Infected.MinAsync(r => r.Date);
+        }
+
+        private async void UpdateCountries()
+        {
+            await using var ctx = new TrackerDbContext();
+            foreach (Country country in ctx.Countries)
+            {
+                var vaccinated = await ctx.Vaccinated.Where(x => x.Id == country.Id).Select(x => (double)x.TotalVaccinations).Distinct().ToListAsync();
+                if (vaccinated[0] == 0.0)
+                {
+                    Countries.Add(new CountryVaccination(country.Name, country.Population, 0.0));
+                }
+                else
+                {
+                    Countries.Add(new CountryVaccination(country.Name, country.Population, vaccinated[0]));
+                }
+                Countries = new ObservableCollection<CountryVaccination>();
+            }
         }
 
         /// <summary>
