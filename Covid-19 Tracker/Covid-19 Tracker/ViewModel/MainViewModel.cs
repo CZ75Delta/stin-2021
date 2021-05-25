@@ -35,7 +35,7 @@ namespace Covid_19_Tracker.ViewModel
         private bool _uiEnabled;
         private bool _updating;
         private ObservableCollection<Infected> _infected;
-        private ObservableCollection<Country> _countries;
+        private ObservableCollection<CountryVaccination> _countries;
         private DateTime _lastUpdate;
         private DateTime _selectedDate;
         private DateTime _earliestDate;
@@ -54,7 +54,7 @@ namespace Covid_19_Tracker.ViewModel
         public bool UpdateEnabled { get => _updateEnabled; private set { _updateEnabled = value; OnPropertyChanged(); } }
         public bool UiEnabled { get => _uiEnabled; private set { _uiEnabled = value; OnPropertyChanged(); } }
         public ObservableCollection<Infected> Infected { get => _infected; private set { _infected = value; OnPropertyChanged(); } }
-        public ObservableCollection<Country> Countries { get => _countries; private set { _countries = value; OnPropertyChanged(); } }
+        public ObservableCollection<CountryVaccination> Countries { get => _countries; private set { _countries = value; OnPropertyChanged(); } }
 
         public DateTime SelectedDate { get => _selectedDate; set { _selectedDate = value; OnPropertyChanged(); } }
         public DateTime EarliestDate { get => _earliestDate; set { _earliestDate = value; OnPropertyChanged(); } }
@@ -284,8 +284,26 @@ namespace Covid_19_Tracker.ViewModel
         private async Task UpdateCountries()
         {
             await using var ctx = new TrackerDbContext();
-            Countries = new ObservableCollection<Country>(await ctx.Countries.ToListAsync());
+            Collection<Country> countries_data = new Collection<Country>(await ctx.Countries.ToListAsync());
+
+            foreach (Country country in countries_data)
+            {
+                var vaccinated = await ctx.Vaccinated.Where(x => x.Id == country.Id).Select(x => (double)x.TotalVaccinations).Distinct().ToListAsync();
+                await Task.WhenAll();
+                if (vaccinated[0] == null)
+                {
+                    Countries.Add(new CountryVaccination(country.Name, country.Population, 0));
+                }
+                else
+                {
+                    Countries.Add(new CountryVaccination(country.Name, country.Population, vaccinated[0]));
+                }
+                Countries = new ObservableCollection<CountryVaccination>();
+                
+            }
+            await Task.WhenAll();
         }
+
 
         /// <summary>
         /// Timer called every time there's no internet connection. Runs for 30 seconds by default, calls SetRetryTextTimerTick every second.
