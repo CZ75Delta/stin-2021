@@ -12,7 +12,8 @@ using Covid_19_Tracker.Model;
 using Microsoft.EntityFrameworkCore;
 using ScottPlot;
 using Serilog;
-
+using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace Covid_19_Tracker.ViewModel
 {
@@ -184,10 +185,45 @@ namespace Covid_19_Tracker.ViewModel
             foreach (Country country in ctx.Countries)
             {
                 var vaccinated = await ctx.Vaccinated.Where(x => x.Id == country.Id).Select(x => (double)x.TotalVaccinations).Distinct().ToListAsync();
-                countries.Add(new CountryVaccination(country.Name, country.Population, vaccinated[0]));
+                CountryVaccination cc = new CountryVaccination(country.Name, country.Population, vaccinated[0]);
+                cc.PropertyChanged += CountryPropertyChanged;
+                countries.Add(cc);
+
             }
             Countries = new ObservableCollection<CountryVaccination>(countries);
+
+            //Testovací část
+            Countries.CollectionChanged += Countries_CollectionChanged;
+            Countries.Add(new CountryVaccination("More", 1321564, 123));
+
         }
+
+        //Navázání, kdyby se přidávali jednotlivé položky nějak jinak, když jsou přidány/odebrány
+        public void Countries_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (CountryVaccination item in e.OldItems)
+                {
+                    //Removed items
+                    item.PropertyChanged -= CountryPropertyChanged;
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (CountryVaccination item in e.NewItems)
+                {
+                    //Added items
+                    item.PropertyChanged += CountryPropertyChanged;
+                }
+            }
+        }
+        //Nastane, pokud je změna na některé z položek
+        private void CountryPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            //Aktuaizuj View
+        }
+
 
 
         /// <summary>
