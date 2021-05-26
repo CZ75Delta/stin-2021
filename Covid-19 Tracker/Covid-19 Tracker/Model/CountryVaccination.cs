@@ -13,14 +13,14 @@ namespace Covid_19_Tracker.Model
     {
         public string Name { get; private set; }
         private bool _isPicked;
-
-        public event PropertyChangedEventHandler PropertyChanged;
+        public char Symbol {get; private set;}
 
         public bool IsPicked
         {
             get {return this._isPicked;}
             set {
                 _isPicked = value;
+                Symbol = _isPicked ? '-' : '+';
                 OnPropertyChanged();
             }
         }
@@ -30,6 +30,7 @@ namespace Covid_19_Tracker.Model
         public CountryVaccination(String _name, long _population, double vaccinated)
         {
             IsPicked = false;
+            Symbol = '+';
             Name = _name;
             VaccinatedCounter = vaccinated;
             VaccinatedPercent = Math.Round((vaccinated) / _population * 100, 1)   + " %";
@@ -39,5 +40,6 @@ namespace Covid_19_Tracker.Model
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

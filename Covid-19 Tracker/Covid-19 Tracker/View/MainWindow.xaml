@@ -52,15 +52,21 @@
                     </Grid.RowDefinitions>
                     <DataGrid x:Name="DataGridCountries" Grid.Column="1" ItemsSource="{Binding Countries}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserResizeRows="False" SelectionMode="Single" CanUserAddRows="False" SelectionChanged="DataGridCountries_SelectionChanged" >
                         <DataGrid.Columns>
-                            <DataGridCheckBoxColumn Header="Výběr" Binding="{Binding IsPicked, UpdateSourceTrigger=PropertyChanged}"/> 
-                            <DataGridTextColumn Header="Seřadit státy" Width="1*" Binding="{Binding Name}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Výběr" Binding="{Binding Symbol}" FontWeight="Bold" FontSize="16">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Seřadit státy" Width="1*" Binding="{Binding Name}"/>
                         </DataGrid.Columns>
                     </DataGrid>
 
                     <DataGrid x:Name="DataGridPickedCountries" Grid.Column="1" Grid.Row="1" ItemsSource="{Binding CountriesPicked}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" CanUserResizeRows="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Stát" Width="1*" Binding="{Binding Name}" />
-                            <DataGridTextColumn Header="Očkování" Width="1*" Binding="{Binding VaccinatedCounter}"/>
+                            <DataGridTextColumn Header="Očkování" Width="1*" Binding="{Binding VaccinatedCounter}" />
                             <DataGridTextColumn Header="Proočkovanost" Width="1*" Binding="{Binding VaccinatedPercent}"/>
                         </DataGrid.Columns>
                     </DataGrid>
