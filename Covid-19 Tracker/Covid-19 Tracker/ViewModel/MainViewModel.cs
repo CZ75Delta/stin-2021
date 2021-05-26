@@ -59,7 +59,6 @@ namespace Covid_19_Tracker.ViewModel
         public ObservableCollection<CountryVaccination> Countries { get => _countries; private set { _countries = value; OnPropertyChanged(); } }
         public ObservableCollection<CountryVaccination> CountriesPicked { get => _countriesPicked; private set { _countriesPicked = value; OnPropertyChanged(); } }
 
-
         public DateTime SelectedDate { get => _selectedDate; set { _selectedDate = value; OnPropertyChanged(); } }
         public DateTime EarliestDate { get => _earliestDate; set { _earliestDate = value; OnPropertyChanged(); } }
         public DateTime LatestDate { get => _latestDate; set { _latestDate = value; OnPropertyChanged(); } }
