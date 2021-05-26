@@ -18,23 +18,21 @@ namespace Covid_19_Tracker.Model
 
         public bool IsPicked
         {
-            get { return this._isPicked; }
+            get {return this._isPicked;}
             set {
-                OnPropertyChanged();
                 _isPicked = value;
-                 }
+                OnPropertyChanged();
+            }
         }
         public double VaccinatedCounter { get; private set; }
         public string VaccinatedPercent { get; private set; }
-        public Visibility Viss {get; private set;}
 
         public CountryVaccination(String _name, long _population, double vaccinated)
         {
-            Viss = Visibility.Collapsed;
             IsPicked = false;
             Name = _name;
             VaccinatedCounter = vaccinated;
-            VaccinatedPercent = Math.Round((vaccinated) / _population,3)  * 100 + " %";
+            VaccinatedPercent = Math.Round((vaccinated) / _population * 100, 1)   + " %";
         }
 
         protected void OnPropertyChanged([CallerMemberName] string name = null)
