@@ -153,7 +153,7 @@ namespace Covid_19_Tracker.ViewModel
             SelectedDate = DateTime.Today.AddDays(-1);
             Infected = new ObservableCollection<Infected>();
             //Initialize Plot Controls
-            PlotControl = new WpfPlot();
+            PlotControl = new WpfPlot{Configuration = { DoubleClickBenchmark = false}};
             PlotFactory();
             //Initialize View Commands
             RefreshCommand = new Command(_ => true, _ => UpdateData());
