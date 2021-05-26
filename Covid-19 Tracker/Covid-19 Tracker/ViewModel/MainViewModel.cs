@@ -195,45 +195,23 @@ namespace Covid_19_Tracker.ViewModel
 
             }
             Countries = new ObservableCollection<CountryVaccination>(countries);
-           
-
-            //Testovací část
-            Countries.CollectionChanged += Countries_CollectionChanged;
-
-        }
-
-        //Navázání, kdyby se přidávali jednotlivé položky nějak jinak, když jsou přidány/odebrány
-        public void Countries_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                foreach (CountryVaccination item in e.OldItems)
-                {
-                    //Removed items
-                    item.PropertyChanged -= CountryPropertyChanged;
-                }
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                foreach (CountryVaccination item in e.NewItems)
-                {
-                    //Added items
-                    item.PropertyChanged += CountryPropertyChanged;
-                }
-            }
         }
         //Nastane, pokud je změna na některé z položek
         private void CountryPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (CountriesPicked.Contains((CountryVaccination)sender))
+            CountryVaccination country = (CountryVaccination)sender;
+            if (CountriesPicked.Contains(country))
             {
-                CountriesPicked.Remove((CountryVaccination)sender);
+                CountriesPicked.Remove(country);
             }
             else
             {
-                CountriesPicked.Add((CountryVaccination)sender);
+                CountriesPicked.Add(country);
             }
-            //Aktuaizuj View
+            //Trochu na prasáka donucení akutalizace kolekce
+            int index = Countries.IndexOf(country);
+            Countries.Remove(country);
+            Countries.Insert(index, country);
         }
 
 
