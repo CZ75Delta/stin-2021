@@ -13,7 +13,9 @@ namespace Covid_19_Tracker.Model
     {
         public string Name { get; private set; }
         private bool _isPicked;
-        public char Symbol {get; private set;}
+        public char Symbol {get; private set; }
+        public double VaccinatedCounter { get; private set; }
+        public string VaccinatedPercent { get; private set; }
 
         public bool IsPicked
         {
@@ -24,8 +26,6 @@ namespace Covid_19_Tracker.Model
                 OnPropertyChanged();
             }
         }
-        public double VaccinatedCounter { get; private set; }
-        public string VaccinatedPercent { get; private set; }
 
         public CountryVaccination(String _name, long _population, double vaccinated)
         {
