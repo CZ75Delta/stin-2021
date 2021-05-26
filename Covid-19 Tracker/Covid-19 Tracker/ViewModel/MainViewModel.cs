@@ -37,6 +37,7 @@ namespace Covid_19_Tracker.ViewModel
         private bool _updating;
         private ObservableCollection<Infected> _infected;
         private ObservableCollection<CountryVaccination> _countries;
+        private ObservableCollection<CountryVaccination> _countriesPicked;
         private DateTime _lastUpdate;
         private DateTime _selectedDate;
         private DateTime _earliestDate;
@@ -56,6 +57,8 @@ namespace Covid_19_Tracker.ViewModel
         public bool UiEnabled { get => _uiEnabled; private set { _uiEnabled = value; OnPropertyChanged(); } }
         public ObservableCollection<Infected> Infected { get => _infected; private set { _infected = value; OnPropertyChanged(); } }
         public ObservableCollection<CountryVaccination> Countries { get => _countries; private set { _countries = value; OnPropertyChanged(); } }
+        public ObservableCollection<CountryVaccination> CountriesPicked { get => _countriesPicked; private set { _countriesPicked = value; OnPropertyChanged(); } }
+
 
         public DateTime SelectedDate { get => _selectedDate; set { _selectedDate = value; OnPropertyChanged(); } }
         public DateTime EarliestDate { get => _earliestDate; set { _earliestDate = value; OnPropertyChanged(); } }
@@ -296,10 +299,10 @@ namespace Covid_19_Tracker.ViewModel
 
             }
             Countries = new ObservableCollection<CountryVaccination>(countries);
+           
 
             //Testovací část
             Countries.CollectionChanged += Countries_CollectionChanged;
-            Countries.Add(new CountryVaccination("More", 1321564, 123));
 
         }
 
@@ -326,6 +329,14 @@ namespace Covid_19_Tracker.ViewModel
         //Nastane, pokud je změna na některé z položek
         private void CountryPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            if (CountriesPicked.Contains((CountryVaccination)sender))
+            {
+                CountriesPicked.Remove((CountryVaccination)sender);
+            }
+            else
+            {
+                CountriesPicked.Add((CountryVaccination)sender);
+            }
             //Aktuaizuj View
         }
 

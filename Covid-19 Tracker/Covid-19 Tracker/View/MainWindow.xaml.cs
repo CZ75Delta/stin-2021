@@ -22,12 +22,16 @@ namespace Covid_19_Tracker.View
 
         private void DataGridCountries_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var more = (CountryVaccination)e.AddedItems[0];
-            more.IsPicked = !more.IsPicked;
-            var test = DataGridPickedCountries.Items;
-            var refs = DataGridPickedCountries;
-
-
+            int counter = DataGridPickedCountries.Items.Count;
+            if(counter > 2)
+            {
+                
+            }
+            if (e.AddedItems.Count > 0)
+            {
+                var SelectedCountry = (CountryVaccination)e.AddedItems[0];
+                SelectedCountry.IsPicked = !SelectedCountry.IsPicked;
+            }
         }
     }
 }
