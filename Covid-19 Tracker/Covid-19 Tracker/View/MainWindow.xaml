@@ -63,7 +63,7 @@
                             </Style>
                         </DataGrid.RowStyle>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Výběr" Binding="{Binding Symbol}" FontWeight="Bold" FontSize="16">
+                            <DataGridTextColumn Header="Výběr" Binding="{Binding Symbol, Mode=OneWay}" FontWeight="Bold" FontSize="16">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="HorizontalAlignment" Value="Center" />
