@@ -123,6 +123,7 @@ namespace Covid_19_Tracker.ViewModel
                     await DataToDb.FixDailyInfected();
                     await UpdateInfectedToDate();
                     await UpdateCountries();
+                    await PlotInfectedData();
 
                     ProgressText = "Poslední aktualizace v " + _lastUpdate.ToString("HH:mm");
                     Log.Information("Update finished.");
@@ -161,7 +162,9 @@ namespace Covid_19_Tracker.ViewModel
             Infected = new ObservableCollection<Infected>();
             //Initialize Plot Controls
             PlotControl = new WpfPlot{Configuration = { DoubleClickBenchmark = false}};
+            //Initialize collections
             Countries = new ObservableCollection<CountryVaccination>();
+            CountriesPicked = new ObservableCollection<CountryVaccination>();
             //Initialize View Commands
             RefreshCommand = new Command(_ => true, _ => UpdateData());
             OnDateChangedCommand = new Command(_ => true, _ => OnDateChanged());
@@ -298,6 +301,7 @@ namespace Covid_19_Tracker.ViewModel
             }
             Countries = new ObservableCollection<CountryVaccination>(countries);
         }
+
         //Nastane, pokud je změna na některé z položek
         private void CountryPropertyChanged(object sender, PropertyChangedEventArgs e)
         {

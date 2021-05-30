@@ -20,7 +20,6 @@ namespace Covid_19_Tracker.View
         {
             VaccinationQueue = new Queue<CountryVaccination>();            
             InitializeComponent();
-            
         }
 
         private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -31,33 +30,26 @@ namespace Covid_19_Tracker.View
 
         private void DataGridCountries_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (e.AddedItems.Count > 0)
+            if (e.AddedItems.Count <= 0) return;
+            var selectedCountry = (CountryVaccination)e.AddedItems[0];
+            if (selectedCountry != null && selectedCountry.IsPicked)
             {
-                var selectedCountry = (CountryVaccination)e.AddedItems[0];                
+                VaccinationQueue = new Queue<CountryVaccination>(VaccinationQueue.Where(s => s != selectedCountry));
+                selectedCountry.IsPicked = false;
+            }
+            else
+            {
+                if (VaccinationQueue.Count >= 4)
+                {
+                    var endOfQueue = VaccinationQueue.Dequeue();
+                    endOfQueue.IsPicked = false;
+                }
+                if (VaccinationQueue.Count > 3) return;
+                if (selectedCountry == null) return;
+                selectedCountry.IsPicked = true;
+                VaccinationQueue.Enqueue(selectedCountry);
 
-                if (selectedCountry.IsPicked == true)
-                {
-                    VaccinationQueue = new Queue<CountryVaccination>(VaccinationQueue.Where(s => s != selectedCountry));
-                    selectedCountry.IsPicked = false;
-                }
-                else
-                {
-                    if (VaccinationQueue.Count >= 4)
-                    {
-                        var endOfQueue = VaccinationQueue.Dequeue();
-                        endOfQueue.IsPicked = false;
-                    }
-                    if (VaccinationQueue.Count <= 3)
-                    {
-                        selectedCountry.IsPicked = true;
-                        VaccinationQueue.Enqueue(selectedCountry);
-                    }
-                    
-                }
             }
         }
-           
-
-        
     }
 }
