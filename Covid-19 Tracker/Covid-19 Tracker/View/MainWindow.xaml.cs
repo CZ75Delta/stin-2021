@@ -44,7 +44,7 @@ namespace Covid_19_Tracker.View
                 {
                     if (VaccinationQueue.Count >= 4)
                     {
-                        CountryVaccination endOfQueue = VaccinationQueue.Dequeue();
+                        var endOfQueue = VaccinationQueue.Dequeue();
                         endOfQueue.IsPicked = false;
                     }
                     if (VaccinationQueue.Count <= 3)

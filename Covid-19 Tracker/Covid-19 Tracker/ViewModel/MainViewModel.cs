@@ -62,8 +62,7 @@ namespace Covid_19_Tracker.ViewModel
         public DateTime SelectedDate { get => _selectedDate; set { _selectedDate = value; OnPropertyChanged(); } }
         public DateTime EarliestDate { get => _earliestDate; set { _earliestDate = value; OnPropertyChanged(); } }
         public DateTime LatestDate { get => _latestDate; set { _latestDate = value; OnPropertyChanged(); } }
-        public WpfPlot InfectedWpfPlot { get => _infectedWpfPlot; private init { _infectedWpfPlot = value; OnPropertyChanged(); } }
-        public WpfPlot VaccinatedWpfPlot { get => _vaccinatedWpfPlot; private init { _vaccinatedWpfPlot = value; OnPropertyChanged(); } }
+        public WpfPlot PlotControl { get => _plotControl; private init { _plotControl = value; OnPropertyChanged(); } }
 
         #endregion
 
@@ -162,7 +161,7 @@ namespace Covid_19_Tracker.ViewModel
             Infected = new ObservableCollection<Infected>();
             //Initialize Plot Controls
             PlotControl = new WpfPlot{Configuration = { DoubleClickBenchmark = false}};
-            Countries = new ObservableCollection<Country>();
+            Countries = new ObservableCollection<CountryVaccination>();
             //Initialize View Commands
             RefreshCommand = new Command(_ => true, _ => UpdateData());
             OnDateChangedCommand = new Command(_ => true, _ => OnDateChanged());
@@ -178,7 +177,7 @@ namespace Covid_19_Tracker.ViewModel
 
         #region Private Methods
 
-        private async Task<List<DateTime>> GetMzcrMissingDates()
+        private static async Task<List<DateTime>> GetMzcrMissingDates()
         {
             await using var ctx = new TrackerDbContext();
             var latestDate = await ctx.Infected.Where(x => x.Source == "mzcr").MaxAsync(r => r.Date);
@@ -186,7 +185,7 @@ namespace Covid_19_Tracker.ViewModel
             var range = Enumerable.Range(0, (int)(latestDate - earliestDate).TotalDays + 1).Select(i => earliestDate.AddDays(i));
             return range.Except(await ctx.Infected.Where(x => x.Source == "mzcr").OrderBy(x => x.Date).Select(x => x.Date).ToListAsync()).ToList();
         }
-        private async Task<List<DateTime>> GetWhoMissingDates()
+        private static async Task<List<DateTime>> GetWhoMissingDates()
         {
             await using var ctx = new TrackerDbContext();
             var latestDate = await ctx.Infected.Where(x => x.Source == "who").MaxAsync(r => r.Date);
@@ -287,12 +286,12 @@ namespace Covid_19_Tracker.ViewModel
         private async Task UpdateCountries()
         {
             await using var ctx = new TrackerDbContext();
-            List<CountryVaccination> countries = new List<CountryVaccination>();
+            var countries = new List<CountryVaccination>();
 
-            foreach (Country country in ctx.Countries)
+            foreach (var country in ctx.Countries)
             {
                 var vaccinated = await ctx.Vaccinated.Where(x => x.Id == country.Id).Select(x => (double)x.TotalVaccinations).Distinct().ToListAsync();
-                CountryVaccination cc = new CountryVaccination(country.Name, country.Population, vaccinated[0]);
+                var cc = new CountryVaccination(country.Name, country.Population, vaccinated[0]);
                 cc.PropertyChanged += CountryPropertyChanged;
                 countries.Add(cc);
 
@@ -302,7 +301,7 @@ namespace Covid_19_Tracker.ViewModel
         //Nastane, pokud je změna na některé z položek
         private void CountryPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            CountryVaccination country = (CountryVaccination)sender;
+            var country = (CountryVaccination)sender;
             if (CountriesPicked.Contains(country))
             {
                 CountriesPicked.Remove(country);
@@ -312,7 +311,7 @@ namespace Covid_19_Tracker.ViewModel
                 CountriesPicked.Add(country);
             }
             //Trochu na prasáka donucení akutalizace kolekce
-            int index = Countries.IndexOf(country);
+            var index = Countries.IndexOf(country);
             Countries.Remove(country);
             Countries.Insert(index, country);
         }
