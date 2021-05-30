@@ -30,8 +30,8 @@
                         <RowDefinition/>
                         <RowDefinition Height="65"/>
                     </Grid.RowDefinitions>
-                    <ContentControl Grid.Row="0" Grid.Column="0" x:Name="InfectedPlot" Content="{Binding PlotControl}"/>
-                    <DataGrid Grid.Row="1" ItemsSource="{Binding Infected}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" CanUserResizeRows="False">
+                    <ContentControl Grid.Row="0" Grid.Column="0" Content="{Binding InfectedWpfPlot}"/>
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding Infected}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" CanUserResizeRows="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Zdroj Dat" Width="1*" Binding="{Binding Source}"/>
                             <DataGridTextColumn Header="Celkový počet případů" Width="2*"  Binding="{Binding TotalCases}"/>
@@ -41,7 +41,47 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Proočkovanost ve světě" x:Name="VaccinatedTab">
-                <Grid Background="#FFE5E5E5"/>
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="0.3*"/>
+                    </Grid.RowDefinitions>
+
+                    <DataGrid x:Name="DataGridCountries" Grid.Column="1" ItemsSource="{Binding Countries}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserResizeRows="False" SelectionMode="Single" CanUserAddRows="False" SelectionChanged="DataGridCountries_SelectionChanged" >
+                        
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="LightGray" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Výběr" Binding="{Binding Symbol, Mode=OneWay}" FontWeight="Bold" FontSize="16">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Seřadit státy" Width="1*" Binding="{Binding Name}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <DataGrid x:Name="DataGridPickedCountries" Grid.Column="1" Grid.Row="1" ItemsSource="{Binding CountriesPicked}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" CanUserResizeRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Stát" Width="1*" Binding="{Binding Name}" />
+                            <DataGridTextColumn Header="Očkování" Width="1*" Binding="{Binding VaccinatedCounter}" />
+                            <DataGridTextColumn Header="Proočkovanost" Width="1*" Binding="{Binding VaccinatedPercent}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
             </TabItem>
         </TabControl>
         <TextBlock x:Name="EndDatePickerLabel" Text="Datum: " TextAlignment="Right" FontSize="12" Grid.Row="0" Grid.Column="3" Margin="0,3,0,0" Height="19"/>
