@@ -154,7 +154,6 @@ namespace Covid_19_Tracker.ViewModel
             Infected = new ObservableCollection<Infected>();
             //Initialize Plot Controls
             PlotControl = new WpfPlot{Configuration = { DoubleClickBenchmark = false}};
-            PlotFactory();
             //Initialize View Commands
             RefreshCommand = new Command(_ => true, _ => UpdateData());
             OnDateChangedCommand = new Command(_ => true, _ => OnDateChanged());
@@ -244,17 +243,25 @@ namespace Covid_19_Tracker.ViewModel
         /// </summary>
         private async Task PlotInfectedData()
         {
-            await using var ctx = new TrackerDbContext();
-            var casesMzcr = await ctx.Infected.Where(x => x.Source == "mzcr").OrderBy(x => x.Date).Select(x => (double)x.TotalCases).ToListAsync();
-            var casesWho = await ctx.Infected.Where(x => x.Source == "who").OrderBy(x => x.Date).Select(x => (double)x.TotalCases).ToListAsync();
-            Array.Clear(_mzcrValues,0, _mzcrValues.Length);
-            Array.Clear(_whoValues, 0, _whoValues.Length);
-            Array.Copy(casesMzcr.ToArray(), _mzcrValues, casesMzcr.Count);
-            Array.Copy(casesWho.ToArray(), _whoValues, casesWho.Count);
-            _mzcrPlot.MaxRenderIndex = Array.FindLastIndex(_mzcrValues, value => value != 0);
-            _whoPlot.MaxRenderIndex = Array.FindLastIndex(_whoValues, value => value != 0);
-            PlotControl.Plot.AxisAuto();
-            PlotControl.Plot.Render();
+            if (_mzcrPlot == null)
+            {
+                PlotFactory();
+                await PlotInfectedData();
+            }
+            else
+            {
+                await using var ctx = new TrackerDbContext();
+                var casesMzcr = await ctx.Infected.Where(x => x.Source == "mzcr").OrderBy(x => x.Date).Select(x => (double)x.TotalCases).ToListAsync();
+                var casesWho = await ctx.Infected.Where(x => x.Source == "who").OrderBy(x => x.Date).Select(x => (double)x.TotalCases).ToListAsync();
+                Array.Clear(_mzcrValues, 0, _mzcrValues.Length);
+                Array.Clear(_whoValues, 0, _whoValues.Length);
+                Array.Copy(casesMzcr.ToArray(), _mzcrValues, casesMzcr.Count);
+                Array.Copy(casesWho.ToArray(), _whoValues, casesWho.Count);
+                _mzcrPlot.MaxRenderIndex = Array.FindLastIndex(_mzcrValues, value => value != 0);
+                _whoPlot.MaxRenderIndex = Array.FindLastIndex(_whoValues, value => value != 0);
+                PlotControl.Plot.AxisAuto();
+                PlotControl.Plot.Render();
+            }
         }
 
         /// <summary>
