@@ -30,7 +30,7 @@
                         <RowDefinition/>
                         <RowDefinition Height="65"/>
                     </Grid.RowDefinitions>
-                    <ContentControl Grid.Row="0" Grid.Column="0" Content="{Binding PlotControl}"/>
+                    <ContentControl Grid.Row="0" Grid.Column="0" Content="{Binding InfectedPlotControl}"/>
                     <DataGrid Grid.Row="1" ItemsSource="{Binding Infected}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" CanUserResizeRows="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Zdroj Dat" Width="1*" Binding="{Binding Source}"/>
@@ -43,16 +43,16 @@
             <TabItem Header="Proočkovanost ve světě" x:Name="VaccinatedTab">
                 <Grid Background="#FFE5E5E5">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="5*"/>
-                        <ColumnDefinition Width="4*"/>
+                        <ColumnDefinition Width="555*"/>
+                        <ColumnDefinition Width="439*"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition/>
                         <RowDefinition Height="110"/>
                     </Grid.RowDefinitions>
-
+                    <ContentControl Grid.Row="0" Grid.Column="0" Content="{Binding VaccinatedPlotControl}" Grid.RowSpan="2"/>
                     <DataGrid x:Name="DataGridCountries" Grid.Column="1" ItemsSource="{Binding Countries}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserResizeRows="False" SelectionMode="Single" CanUserAddRows="False" SelectionChanged="DataGridCountries_SelectionChanged" >
-                        
+
                         <DataGrid.RowStyle>
                             <Style TargetType="DataGridRow">
                                 <Style.Triggers>
@@ -74,7 +74,7 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <DataGrid x:Name="DataGridPickedCountries" Grid.Column="1" Grid.Row="1" ItemsSource="{Binding CountriesPicked}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" CanUserResizeRows="False">
+                    <DataGrid x:Name="DataGridPickedCountries" Grid.Column="1" ItemsSource="{Binding CountriesPicked}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" CanUserResizeRows="False" Margin="0,421,0,0" Grid.RowSpan="2">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Stát" Width="1*" Binding="{Binding Name}" />
                             <DataGridTextColumn Header="Očkování" Width="1*" Binding="{Binding VaccinatedCounter}" />

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Threading;
 using Covid_19_Tracker.Base;
 using Covid_19_Tracker.Model;
+using Covid_19_Tracker.View;
 using Microsoft.EntityFrameworkCore;
 using ScottPlot;
 using ScottPlot.Plottable;
@@ -16,17 +17,20 @@ using Serilog;
 using System.Collections.Specialized;
 using System.ComponentModel;
 
+
 namespace Covid_19_Tracker.ViewModel
 {
     public class MainViewModel : BaseViewModel
     {
         #region Global Variables
 
-        private readonly WpfPlot _plotControl;
+        private readonly WpfPlot _infectedplotControl;
+        private readonly WpfPlot _vaccinatedplotControl;
         private SignalPlot _mzcrPlot;
         private SignalPlot _whoPlot;
+        private BarPlot _vaccinatedPlot;
         private ScatterPlot _highlightedPointWho;
-        private ScatterPlot _highlightedPointMzcr;
+        private ScatterPlot _highlightedPointMzcr;        
         private Timer _updateTimer;
         private DispatcherTimer _retryTextTimer;
         private int _retrySeconds;
@@ -62,7 +66,8 @@ namespace Covid_19_Tracker.ViewModel
         public DateTime SelectedDate { get => _selectedDate; set { _selectedDate = value; OnPropertyChanged(); } }
         public DateTime EarliestDate { get => _earliestDate; set { _earliestDate = value; OnPropertyChanged(); } }
         public DateTime LatestDate { get => _latestDate; set { _latestDate = value; OnPropertyChanged(); } }
-        public WpfPlot PlotControl { get => _plotControl; private init { _plotControl = value; OnPropertyChanged(); } }
+        public WpfPlot InfectedPlotControl { get => _infectedplotControl; private init { _infectedplotControl = value; OnPropertyChanged(); } }
+        public WpfPlot VaccinatedPlotControl { get => _vaccinatedplotControl; private init { _vaccinatedplotControl = value; OnPropertyChanged(); } }
 
         #endregion
 
@@ -124,6 +129,8 @@ namespace Covid_19_Tracker.ViewModel
                     await UpdateInfectedToDate();
                     await UpdateCountries();
                     await PlotInfectedData();
+                    UpdateVaccinatedData();
+
 
                     ProgressText = "Poslední aktualizace v " + _lastUpdate.ToString("HH:mm");
                     Log.Information("Update finished.");
@@ -161,7 +168,9 @@ namespace Covid_19_Tracker.ViewModel
             SelectedDate = DateTime.Today.AddDays(-1);
             Infected = new ObservableCollection<Infected>();
             //Initialize Plot Controls
-            PlotControl = new WpfPlot{Configuration = { DoubleClickBenchmark = false}};
+            InfectedPlotControl = new WpfPlot{Configuration = {DoubleClickBenchmark = false}};
+            //Initialize Infected Plot Controls
+            VaccinatedPlotControl = new WpfPlot{Configuration = {DoubleClickBenchmark = false }};
             //Initialize collections
             Countries = new ObservableCollection<CountryVaccination>();
             CountriesPicked = new ObservableCollection<CountryVaccination>();
@@ -197,34 +206,82 @@ namespace Covid_19_Tracker.ViewModel
             return range.Except(await ctx.Infected.Where(x => x.Source == "who").OrderBy(x => x.Date).Select(x => x.Date).ToListAsync()).ToList();
         }
 
-        private void PlotFactory()
+        private void PlotInfectedFactory()
         {
             using var ctx = new TrackerDbContext();
             Array.Copy(ctx.Infected.Where(x => x.Source == "mzcr").OrderBy(x => x.Date).Select(x => (double)x.TotalCases).ToArray(),_mzcrValues, 0);
             Array.Copy(ctx.Infected.Where(x => x.Source == "who").OrderBy(x => x.Date).Select(x => (double)x.TotalCases).ToArray(),_whoValues, 0);
-            _mzcrPlot = PlotControl.Plot.AddSignal(_mzcrValues, 1, Color.Crimson, label: "MZČR");
-            _whoPlot = PlotControl.Plot.AddSignal(_whoValues, 1, Color.DarkTurquoise, "WHO");
+            _mzcrPlot = InfectedPlotControl.Plot.AddSignal(_mzcrValues, 1, Color.Crimson, label: "MZČR");
+            _whoPlot = InfectedPlotControl.Plot.AddSignal(_whoValues, 1, Color.DarkTurquoise, "WHO");
             _mzcrPlot.OffsetX = ctx.Infected.MinAsync(r => r.Date).Result.ToOADate();
             _whoPlot.OffsetX = ctx.Infected.MinAsync(r => r.Date).Result.ToOADate();
-            PlotControl.MouseDoubleClick += PlotControl_DoubleClick;
-            PlotControl.MouseMove += PlotControl_MouseMove;
-            PlotControl.Plot.XAxis.DateTimeFormat(true);
-            PlotControl.Plot.XLabel("Datum");
-            PlotControl.Plot.YLabel("Celkový počet nakažených");
-            PlotControl.Plot.Title("Porovnání nakažených v ČR z dat MZČR a WHO");
-            PlotControl.Plot.AxisAuto();
-            PlotControl.Plot.Legend();
-            _highlightedPointMzcr = PlotControl.Plot.AddPoint(0, 0);
+            InfectedPlotControl.MouseDoubleClick += PlotControl_DoubleClick;
+            InfectedPlotControl.MouseMove += PlotControl_MouseMove;
+            InfectedPlotControl.Plot.XAxis.DateTimeFormat(true);
+            InfectedPlotControl.Plot.XLabel("Datum");
+            InfectedPlotControl.Plot.YLabel("Celkový počet nakažených");
+            InfectedPlotControl.Plot.Title("Porovnání nakažených v ČR z dat MZČR a WHO");
+            InfectedPlotControl.Plot.AxisAuto();
+            InfectedPlotControl.Plot.Legend();
+            _highlightedPointMzcr = InfectedPlotControl.Plot.AddPoint(0, 0);
             _highlightedPointMzcr.Color = Color.Green;
             _highlightedPointMzcr.MarkerSize = 10;
             _highlightedPointMzcr.MarkerShape = MarkerShape.openCircle;
             _highlightedPointMzcr.IsVisible = false;
-            _highlightedPointWho = PlotControl.Plot.AddPoint(0, 0);
+            _highlightedPointWho = InfectedPlotControl.Plot.AddPoint(0, 0);
             _highlightedPointWho.Color = Color.Green;
             _highlightedPointWho.MarkerSize = 10;
             _highlightedPointWho.MarkerShape = MarkerShape.openCircle;
             _highlightedPointWho.IsVisible = false;
         }
+
+        private void PlotVaccinatedFactory()
+        {
+            
+            VaccinatedPlotControl.Plot.SetAxisLimits(yMin: 0, yMax: 100);
+            VaccinatedPlotControl.Plot.XLabel("Země");
+            VaccinatedPlotControl.Plot.YLabel("% proočkovanost");
+            VaccinatedPlotControl.Plot.Title("Proočkovanost ve vybraných státech");
+        }
+
+        private void UpdateVaccinatedData()
+        {
+            VaccinatedPlotControl.Plot.Clear();
+            PlotVaccinatedFactory();
+            (var values, var positions, var labels) = GetVaccinatedData();
+            _vaccinatedPlot = VaccinatedPlotControl.Plot.AddBar(values, positions);
+            VaccinatedPlotControl.Plot.XTicks(positions, labels);
+            VaccinatedPlotControl.Plot.SetAxisLimits(xMax: positions.Length-0.5);
+            VaccinatedPlotControl.Render();
+        }
+
+        private (double[],double[],string[]) GetVaccinatedData()
+        {
+            using var ctx = new TrackerDbContext();
+
+            var czechia = ctx.Vaccinated.Where(cz => cz.Country.Name == "Czechia").First();
+            var czechiaCountry = ctx.Countries.Where(cz => cz.Name == "Czechia").First();
+
+            var cz = new CountryVaccination(czechiaCountry.Name, czechiaCountry.Population, czechia.TotalVaccinations);
+
+            int count = CountriesPicked.Count+1;
+
+            double[] VaccinatedValues = new double[count];
+            double[] VaccinatedPositions = new double[count];
+            string[] VaccinatedLabels = new string[count];
+
+            VaccinatedValues[0] = Double.Parse(cz.VaccinatedPercent.Split(" %")[0]);
+            VaccinatedPositions[0] = 0;
+            VaccinatedLabels[0] = cz.Name;
+
+            for (int i = 1; i < count; i++)
+            {
+                VaccinatedValues[i] = Double.Parse(CountriesPicked[i-1].VaccinatedPercent.Split(" %")[0]);
+                VaccinatedPositions[i] = i;
+                VaccinatedLabels[i] = CountriesPicked[i-1].Name;
+            }
+            return (VaccinatedValues, VaccinatedPositions, VaccinatedLabels);
+        }        
 
         private async void PlotControl_DoubleClick(object sender, EventArgs e)
         {
@@ -234,7 +291,7 @@ namespace Covid_19_Tracker.ViewModel
 
         private void PlotControl_MouseMove(object sender, EventArgs e)
         {
-            var (mouseCoordinateX, _) = PlotControl.GetMouseCoordinates();
+            var (mouseCoordinateX, _) = InfectedPlotControl.GetMouseCoordinates();
             var (mzcrPointX, mzcrPointY, mzcrPointIndex) = _mzcrPlot.GetPointNearestX(mouseCoordinateX);
             var (whoPointX, whoPointY, whoPointIndex) = _whoPlot.GetPointNearestX(mouseCoordinateX);
             _highlightedPointMzcr.Xs[0] = mzcrPointX;
@@ -246,7 +303,7 @@ namespace Covid_19_Tracker.ViewModel
             if (_mzcrLastHighlightedIndex == mzcrPointIndex && _whoLastHighlightedIndex == whoPointIndex) return;
             _mzcrLastHighlightedIndex = mzcrPointIndex;
             _whoLastHighlightedIndex = whoPointIndex;
-            PlotControl.Render();
+            InfectedPlotControl.Render();
         }
 
         /// <summary>
@@ -256,7 +313,8 @@ namespace Covid_19_Tracker.ViewModel
         {
             if (_mzcrPlot == null)
             {
-                PlotFactory();
+                //PlotVaccinatedFactory();
+                PlotInfectedFactory();
                 await PlotInfectedData();
             }
             else
@@ -270,8 +328,8 @@ namespace Covid_19_Tracker.ViewModel
                 Array.Copy(casesWho.ToArray(), _whoValues, casesWho.Count);
                 _mzcrPlot.MaxRenderIndex = Array.FindLastIndex(_mzcrValues, value => value != 0);
                 _whoPlot.MaxRenderIndex = Array.FindLastIndex(_whoValues, value => value != 0);
-                PlotControl.Plot.AxisAuto();
-                PlotControl.Plot.Render();
+                InfectedPlotControl.Plot.AxisAuto();
+                InfectedPlotControl.Plot.Render();
             }
         }
 
@@ -315,9 +373,12 @@ namespace Covid_19_Tracker.ViewModel
                 CountriesPicked.Add(country);
             }
             //Trochu na prasáka donucení akutalizace kolekce
+            UpdateVaccinatedData();
             var index = Countries.IndexOf(country);
             Countries.Remove(country);
             Countries.Insert(index, country);
+            
+
         }
 
 
