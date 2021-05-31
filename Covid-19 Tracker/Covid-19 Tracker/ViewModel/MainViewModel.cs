@@ -24,8 +24,8 @@ namespace Covid_19_Tracker.ViewModel
     {
         #region Global Variables
 
-        private readonly WpfPlot _infectedplotControl;
-        private readonly WpfPlot _vaccinatedplotControl;
+        private readonly WpfPlot _infectedPlotControl;
+        private readonly WpfPlot _vaccinatedPlotControl;
         private SignalPlot _mzcrPlot;
         private SignalPlot _whoPlot;
         private BarPlot _vaccinatedPlot;
@@ -66,8 +66,8 @@ namespace Covid_19_Tracker.ViewModel
         public DateTime SelectedDate { get => _selectedDate; set { _selectedDate = value; OnPropertyChanged(); } }
         public DateTime EarliestDate { get => _earliestDate; set { _earliestDate = value; OnPropertyChanged(); } }
         public DateTime LatestDate { get => _latestDate; set { _latestDate = value; OnPropertyChanged(); } }
-        public WpfPlot InfectedPlotControl { get => _infectedplotControl; private init { _infectedplotControl = value; OnPropertyChanged(); } }
-        public WpfPlot VaccinatedPlotControl { get => _vaccinatedplotControl; private init { _vaccinatedplotControl = value; OnPropertyChanged(); } }
+        public WpfPlot InfectedPlotControl { get => _infectedPlotControl; private init { _infectedPlotControl = value; OnPropertyChanged(); } }
+        public WpfPlot VaccinatedPlotControl { get => _vaccinatedPlotControl; private init { _vaccinatedPlotControl = value; OnPropertyChanged(); } }
 
         #endregion
 
@@ -170,7 +170,7 @@ namespace Covid_19_Tracker.ViewModel
             //Initialize Plot Controls
             InfectedPlotControl = new WpfPlot{Configuration = {DoubleClickBenchmark = false}};
             //Initialize Infected Plot Controls
-            VaccinatedPlotControl = new WpfPlot{Configuration = {DoubleClickBenchmark = false }};
+            VaccinatedPlotControl = new WpfPlot{Configuration = {DoubleClickBenchmark = false, LeftClickDragPan = false, LockHorizontalAxis = true, LockVerticalAxis = true, Zoom = false}};
             //Initialize collections
             Countries = new ObservableCollection<CountryVaccination>();
             CountriesPicked = new ObservableCollection<CountryVaccination>();
@@ -237,18 +237,18 @@ namespace Covid_19_Tracker.ViewModel
 
         private void PlotVaccinatedFactory()
         {
-            
             VaccinatedPlotControl.Plot.SetAxisLimits(yMin: 0, yMax: 100);
             VaccinatedPlotControl.Plot.XLabel("Země");
             VaccinatedPlotControl.Plot.YLabel("% proočkovanost");
             VaccinatedPlotControl.Plot.Title("Proočkovanost ve vybraných státech");
+            VaccinatedPlotControl.RightClicked -= VaccinatedPlotControl.DefaultRightClickEvent;
         }
 
         private void UpdateVaccinatedData()
         {
             VaccinatedPlotControl.Plot.Clear();
             PlotVaccinatedFactory();
-            (var values, var positions, var labels) = GetVaccinatedData();
+            var (values, positions, labels) = GetVaccinatedData();
             _vaccinatedPlot = VaccinatedPlotControl.Plot.AddBar(values, positions);
             VaccinatedPlotControl.Plot.XTicks(positions, labels);
             VaccinatedPlotControl.Plot.SetAxisLimits(xMax: positions.Length-0.5);
@@ -259,28 +259,28 @@ namespace Covid_19_Tracker.ViewModel
         {
             using var ctx = new TrackerDbContext();
 
-            var czechia = ctx.Vaccinated.Where(cz => cz.Country.Name == "Czechia").First();
-            var czechiaCountry = ctx.Countries.Where(cz => cz.Name == "Czechia").First();
+            var czechia = ctx.Vaccinated.First(x => x.Country.Name == "Czechia");
+            var czechiaCountry = ctx.Countries.First(x => x.Name == "Czechia");
 
             var cz = new CountryVaccination(czechiaCountry.Name, czechiaCountry.Population, czechia.TotalVaccinations);
 
-            int count = CountriesPicked.Count+1;
+            var count = CountriesPicked.Count+1;
 
-            double[] VaccinatedValues = new double[count];
-            double[] VaccinatedPositions = new double[count];
-            string[] VaccinatedLabels = new string[count];
+            var vaccinatedValues = new double[count];
+            var vaccinatedPositions = new double[count];
+            var vaccinatedLabels = new string[count];
 
-            VaccinatedValues[0] = Double.Parse(cz.VaccinatedPercent.Split(" %")[0]);
-            VaccinatedPositions[0] = 0;
-            VaccinatedLabels[0] = cz.Name;
+            vaccinatedValues[0] = double.Parse(cz.VaccinatedPercent.Split(" %")[0]);
+            vaccinatedPositions[0] = 0;
+            vaccinatedLabels[0] = cz.Name;
 
-            for (int i = 1; i < count; i++)
+            for (var i = 1; i < count; i++)
             {
-                VaccinatedValues[i] = Double.Parse(CountriesPicked[i-1].VaccinatedPercent.Split(" %")[0]);
-                VaccinatedPositions[i] = i;
-                VaccinatedLabels[i] = CountriesPicked[i-1].Name;
+                vaccinatedValues[i] = double.Parse(CountriesPicked[i-1].VaccinatedPercent.Split(" %")[0]);
+                vaccinatedPositions[i] = i;
+                vaccinatedLabels[i] = CountriesPicked[i-1].Name;
             }
-            return (VaccinatedValues, VaccinatedPositions, VaccinatedLabels);
+            return (vaccinatedValues, vaccinatedPositions, vaccinatedLabels);
         }        
 
         private async void PlotControl_DoubleClick(object sender, EventArgs e)
@@ -380,8 +380,6 @@ namespace Covid_19_Tracker.ViewModel
             
 
         }
-
-
 
         /// <summary>
         /// Timer called every time there's no internet connection. Runs for 30 seconds by default, calls SetRetryTextTimerTick every second.

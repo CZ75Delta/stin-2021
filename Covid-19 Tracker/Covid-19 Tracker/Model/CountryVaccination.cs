@@ -11,15 +11,15 @@ namespace Covid_19_Tracker.Model
 {
     public class CountryVaccination : INotifyPropertyChanged
     {
-        public string Name { get; private set; }
+        public string Name { get; }
         private bool _isPicked;
         public char Symbol {get; private set; }
-        public double VaccinatedCounter { get; private set; }
-        public string VaccinatedPercent { get; private set; }
+        public double VaccinatedCounter { get; }
+        public string VaccinatedPercent { get; }
 
         public bool IsPicked
         {
-            get {return this._isPicked;}
+            get => _isPicked;
             set {
                 _isPicked = value;
                 Symbol = _isPicked ? '-' : '+';
@@ -27,16 +27,16 @@ namespace Covid_19_Tracker.Model
             }
         }
 
-        public CountryVaccination(String _name, long _population, double vaccinated)
+        public CountryVaccination(string name, long population, double vaccinated)
         {
             IsPicked = false;
             Symbol = '+';
-            Name = _name;
+            Name = name;
             VaccinatedCounter = vaccinated;
-            VaccinatedPercent = Math.Round((vaccinated) / _population * 100, 1)   + " %";
+            VaccinatedPercent = Math.Round((vaccinated) / population * 100, 1)   + " %";
         }
 
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        private void OnPropertyChanged([CallerMemberName] string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }

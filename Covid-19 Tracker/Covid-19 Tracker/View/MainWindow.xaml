@@ -6,7 +6,7 @@
         xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
         xmlns:mvm="clr-namespace:Covid_19_Tracker.ViewModel"
         mc:Ignorable="d"
-        Title="Covid-19 Tracker" Height="600" Width="1000" MinHeight="400" MinWidth="600" IsEnabled="{Binding UiEnabled}">
+        Title="Covid-19 Tracker" Height="600" Width="1000" MinHeight="600" MinWidth="800" IsEnabled="{Binding UiEnabled}">
     <Window.DataContext>
         <mvm:MainViewModel />
     </Window.DataContext>
@@ -40,19 +40,22 @@
                     </DataGrid>
                 </Grid>
             </TabItem>
-            <TabItem Header="Proočkovanost ve světě" x:Name="VaccinatedTab">
+            <TabItem Header="Proočkovanost ve světě">
                 <Grid Background="#FFE5E5E5">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="555*"/>
-                        <ColumnDefinition Width="439*"/>
+                        <ColumnDefinition Width="5*"/>
+                        <ColumnDefinition Width="4*"/>
+                        <ColumnDefinition Width="22"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="22"/>
                         <RowDefinition/>
-                        <RowDefinition Height="110"/>
+                        <RowDefinition Height="120"/>
                     </Grid.RowDefinitions>
-                    <ContentControl Grid.Row="0" Grid.Column="0" Content="{Binding VaccinatedPlotControl}" Grid.RowSpan="2"/>
-                    <DataGrid x:Name="DataGridCountries" Grid.Column="1" ItemsSource="{Binding Countries}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserResizeRows="False" SelectionMode="Single" CanUserAddRows="False" SelectionChanged="DataGridCountries_SelectionChanged" >
-
+                    <ContentControl Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" Content="{Binding VaccinatedPlotControl}"/>
+                    <TextBox Grid.Column="1" Grid.Row="0" x:Name="Tb"/>
+                    <Button Grid.Column="2" Grid.Row="0" Content="X" Width="22"></Button>
+                    <DataGrid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding Countries}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserResizeRows="False" SelectionMode="Single" CanUserAddRows="False" SelectionChanged="DataGridCountries_SelectionChanged">
                         <DataGrid.RowStyle>
                             <Style TargetType="DataGridRow">
                                 <Style.Triggers>
@@ -74,7 +77,7 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <DataGrid x:Name="DataGridPickedCountries" Grid.Column="1" ItemsSource="{Binding CountriesPicked}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" CanUserResizeRows="False" Margin="0,421,0,0" Grid.RowSpan="2">
+                    <DataGrid Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding CountriesPicked}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" CanUserResizeRows="False" Grid.Row="2">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Stát" Width="1*" Binding="{Binding Name}" />
                             <DataGridTextColumn Header="Očkování" Width="1*" Binding="{Binding VaccinatedCounter}" />
