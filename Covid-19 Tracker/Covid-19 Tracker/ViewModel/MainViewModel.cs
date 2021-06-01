@@ -9,12 +9,10 @@ using System.Threading.Tasks;
 using System.Windows.Threading;
 using Covid_19_Tracker.Base;
 using Covid_19_Tracker.Model;
-using Covid_19_Tracker.View;
 using Microsoft.EntityFrameworkCore;
 using ScottPlot;
 using ScottPlot.Plottable;
 using Serilog;
-using System.Collections.Specialized;
 using System.ComponentModel;
 
 

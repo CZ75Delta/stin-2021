@@ -1,11 +1,9 @@
 ﻿using Covid_19_Tracker.Model;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Threading;
 
 namespace Covid_19_Tracker.View
 {

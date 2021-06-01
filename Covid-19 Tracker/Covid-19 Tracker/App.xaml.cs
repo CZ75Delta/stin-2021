@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using Covid_19_Tracker.Model;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
