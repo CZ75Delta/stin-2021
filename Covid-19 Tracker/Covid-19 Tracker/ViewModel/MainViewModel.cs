@@ -130,10 +130,6 @@ namespace Covid_19_Tracker.ViewModel
                     await UpdateCountries();
                     await PlotInfectedData();
                     UpdateVaccinatedData();
-
-
-                    ProgressText = "Poslední aktualizace v " + _lastUpdate.ToString("HH:mm");
-                    Log.Information("Update finished.");
                 });
                 
             }
@@ -142,7 +138,8 @@ namespace Covid_19_Tracker.ViewModel
                 UpdateEnabled = false;
                 SetRetryTextTimer();
             }
-
+            ProgressText = "Poslední aktualizace v " + _lastUpdate.ToString("HH:mm");
+            Log.Information("Update finished.");
             ProgressBar = false;
             UiEnabled = true;
             _updating = false;
