@@ -1,12 +1,9 @@
 ﻿using Covid_19_Tracker.Model;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Threading;
 
 namespace Covid_19_Tracker.View
 {
@@ -15,11 +12,11 @@ namespace Covid_19_Tracker.View
     /// </summary>
     public partial class MainWindow : Window
     {
-        public Queue<CountryVaccination> VaccinationQueue { get; private set; }
+        private LinkedList<CountryVaccination> VaccinationQueue { get; set; }
 
         public MainWindow()
         {
-            VaccinationQueue = new Queue<CountryVaccination>();            
+            VaccinationQueue = new LinkedList<CountryVaccination>();
             InitializeComponent();
         }
 
@@ -31,29 +28,29 @@ namespace Covid_19_Tracker.View
 
         private void DataGridCountries_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            
             if (e.AddedItems.Count <= 0) return;
             var selectedCountry = (CountryVaccination)e.AddedItems[0];
-            if (selectedCountry != null && selectedCountry.IsPicked)
+            if (selectedCountry is {IsPicked: true})
             {
-                VaccinationQueue = new Queue<CountryVaccination>(VaccinationQueue.Where(s => s != selectedCountry));
+                VaccinationQueue.Remove(VaccinationQueue.First(s => s == selectedCountry));
                 selectedCountry.IsPicked = false;
             }
             else
             {
                 if (VaccinationQueue.Count >= 4)
                 {
-                    var endOfQueue = VaccinationQueue.Dequeue();
+                    var endOfQueue = VaccinationQueue.First(x => !x.Name.Equals("Czechia"));
                     endOfQueue.IsPicked = false;
-                }
+                    VaccinationQueue.Remove(endOfQueue);
+                }   
                 if (VaccinationQueue.Count > 3) return;
                 if (selectedCountry == null) return;
                 selectedCountry.IsPicked = true;
-                VaccinationQueue.Enqueue(selectedCountry);
-
+                VaccinationQueue.AddLast(selectedCountry);
             }
+            CountriesGrid.Items.Refresh();
+            CountriesGrid.SelectedItem = null;
         }
-
 
         /// <summary>
         /// Působí jako filtr zemí jenž zobrazí odpovídající výsledky dle textu v poli
@@ -76,6 +73,7 @@ namespace Covid_19_Tracker.View
             }
             CountriesGrid.Items.Refresh();
         }
+
         /// <summary>
         /// Vymaže všechen text z filtrovacího pole
         /// </summary>

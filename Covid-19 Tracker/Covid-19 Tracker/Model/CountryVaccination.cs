@@ -11,12 +11,11 @@ namespace Covid_19_Tracker.Model
 {
     public class CountryVaccination : INotifyPropertyChanged
     {
-        public string Name { get; }
         private bool _isPicked;
+        public string Name { get; set; }
         public char Symbol {get; private set; }
         public double VaccinatedCounter { get; }
         public string VaccinatedPercent { get; }
-
         public bool IsPicked
         {
             get => _isPicked;

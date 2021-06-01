@@ -14,6 +14,8 @@ using ScottPlot;
 using ScottPlot.Plottable;
 using Serilog;
 using System.ComponentModel;
+using System.Threading;
+using Timer = System.Timers.Timer;
 
 
 namespace Covid_19_Tracker.ViewModel
@@ -26,26 +28,25 @@ namespace Covid_19_Tracker.ViewModel
         private readonly WpfPlot _vaccinatedPlotControl;
         private SignalPlot _mzcrPlot;
         private SignalPlot _whoPlot;
-        private BarPlot _vaccinatedPlot;
         private ScatterPlot _highlightedPointWho;
-        private ScatterPlot _highlightedPointMzcr;        
-        private Timer _updateTimer;
-        private DispatcherTimer _retryTextTimer;
-        private int _retrySeconds;
-        private string _progressText;
-        private bool _progressBar;
-        private bool _updateEnabled;
-        private bool _uiEnabled;
-        private bool _updating;
-        private ObservableCollection<Infected> _infected;
-        private ObservableCollection<CountryVaccination> _countries;
-        private ObservableCollection<CountryVaccination> _countriesPicked;
+        private ScatterPlot _highlightedPointMzcr;
         private DateTime _lastUpdate;
         private DateTime _selectedDate;
         private DateTime _earliestDate;
         private DateTime _latestDate;
+        private Timer _updateTimer;
+        private DispatcherTimer _retryTextTimer;
+        private ObservableCollection<Infected> _infected;
+        private ObservableCollection<CountryVaccination> _countries;
+        private ObservableCollection<CountryVaccination> _countriesPicked;
+        private int _retrySeconds;
         private int _mzcrLastHighlightedIndex = -1;
         private int _whoLastHighlightedIndex = -1;
+        private bool _progressBar;
+        private bool _updateEnabled;
+        private bool _uiEnabled;
+        private bool _updating;
+        private string _progressText;
         private double[] _mzcrValues = new double[730];
         private double[] _whoValues = new double[730];
 
@@ -59,8 +60,7 @@ namespace Covid_19_Tracker.ViewModel
         public bool UiEnabled { get => _uiEnabled; private set { _uiEnabled = value; OnPropertyChanged(); } }
         public ObservableCollection<Infected> Infected { get => _infected; private set { _infected = value; OnPropertyChanged(); } }
         public ObservableCollection<CountryVaccination> Countries { get => _countries; private set { _countries = value; OnPropertyChanged(); } }
-        public ObservableCollection<CountryVaccination> CountriesPicked { get => _countriesPicked; private set { _countriesPicked = value; OnPropertyChanged(); } }
-
+        public ObservableCollection<CountryVaccination> CountriesPicked { get => _countriesPicked; private init { _countriesPicked = value; OnPropertyChanged(); } }
         public DateTime SelectedDate { get => _selectedDate; set { _selectedDate = value; OnPropertyChanged(); } }
         public DateTime EarliestDate { get => _earliestDate; set { _earliestDate = value; OnPropertyChanged(); } }
         public DateTime LatestDate { get => _latestDate; set { _latestDate = value; OnPropertyChanged(); } }
@@ -83,53 +83,47 @@ namespace Covid_19_Tracker.ViewModel
         /// </summary>
         private async void UpdateData()
         {
-            if (_updating) return;
-            _updating = true;
+            if (_updating) { return; }
+            UpdateEnabled = ProgressBar = _updating = true;
+            ProgressText = "Hledám aktualizace...";
             Log.Information("Starting update.");
             if (await CheckInternetConnection.CheckForInternetConnection(1000))
             {
                 _lastUpdate = DateTime.Now;
-                await Task.Factory.StartNew(async () =>
-                {
-                    ProgressText = "Hledám aktualizace...";
-                    UpdateEnabled = ProgressBar = true;
-
-                    //Get and save WHO Vaccinations + Country data
-                    var listWho = ProcessData.ProcessWhoVaccinated(ApiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv").Result).Result;
-                    await DataToDb.InitializeCountries(listWho);
-                    await DataToDb.SaveToDb(listWho);
-
-                    //Get and save MZČR Summary
-                    await DataToDb.SavetoDb(ProcessData.ProcessMzcr(ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json").Result).Result);
-                    var mzcrMissing = GetMzcrMissingDates().Result;
-                    if (mzcrMissing.Count > 0)
-                    {
-                        var mzcrHistory = await ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/nakazeni-vyleceni-umrti-testy.json");
-                        foreach (var missingDate in mzcrMissing)
-                        {
-                            await DataToDb.SavetoDb(ProcessData.ProcessMzcrDate(mzcrHistory, missingDate).Result);
-                        }
-                    }
-
-                    //Get and save WHO Infections
-                    var whoInfections = await ApiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv");
-                    await DataToDb.SavetoDb(ProcessData.ProcessWhoInfected(whoInfections).Result);
-                    var whoMissing = GetWhoMissingDates().Result;
-                    if (whoMissing.Count > 0)
-                    {
-                        foreach (var missingDate in whoMissing)
-                        {
-                            await DataToDb.SavetoDb(ProcessData.ProcessWhoInfected(whoInfections, missingDate).Result);
-                        }
-                    }
-
-                    await DataToDb.FixDailyInfected();
-                    await UpdateInfectedToDate();
-                    await UpdateCountries();
-                    await PlotInfectedData();
-                    UpdateVaccinatedData();
-                });
-                
+                _ = await Task.Factory.StartNew(async () =>
+                  {
+                      //Get and save WHO Vaccinations + Country data
+                      var listWho = ProcessData.ProcessWhoVaccinated(ApiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv").Result).Result;
+                      await DataToDb.InitializeCountries(listWho);
+                      await DataToDb.SaveToDb(listWho);
+                      //Get and save MZČR Summary
+                      await DataToDb.SavetoDb(ProcessData.ProcessMzcr(ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json").Result).Result);
+                      var mzcrMissing = GetMzcrMissingDates().Result;
+                      if (mzcrMissing.Count > 0)
+                      {
+                          var mzcrHistory = await ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/nakazeni-vyleceni-umrti-testy.json");
+                          foreach (var missingDate in mzcrMissing)
+                          {
+                              await DataToDb.SavetoDb(ProcessData.ProcessMzcrDate(mzcrHistory, missingDate).Result);
+                          }
+                      }
+                      //Get and save WHO Infections
+                      var whoInfections = await ApiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv");
+                      await DataToDb.SavetoDb(ProcessData.ProcessWhoInfected(whoInfections).Result);
+                      var whoMissing = GetWhoMissingDates().Result;
+                      if (whoMissing.Count > 0)
+                      {
+                          foreach (var missingDate in whoMissing)
+                          {
+                              await DataToDb.SavetoDb(ProcessData.ProcessWhoInfected(whoInfections, missingDate).Result);
+                          }
+                      }
+                      await DataToDb.FixDailyInfected();
+                      await UpdateInfectedToDate();
+                      await UpdateCountries();
+                      await PlotInfectedData();
+                      if (CountriesPicked.Count > 0) UpdateVaccinatedData();
+                  });
             }
             else
             {
@@ -144,7 +138,7 @@ namespace Covid_19_Tracker.ViewModel
         }
 
         /// <summary>
-        /// Occurs once the date is changed in the DatePicker. Updates the DataGrid with the data relevant to that date.
+        /// Occurs once the date is changed in the DatePicker. Updates the Infected DataGrid with the data relevant to that date.
         /// </summary>
         private async void OnDateChanged()
         {
@@ -157,15 +151,16 @@ namespace Covid_19_Tracker.ViewModel
         #endregion
 
         #region Constructor
+
         public MainViewModel()
         {
             //Initialize global variables
             SelectedDate = DateTime.Today.AddDays(-1);
             Infected = new ObservableCollection<Infected>();
             //Initialize Plot Controls
-            InfectedPlotControl = new WpfPlot{Configuration = {DoubleClickBenchmark = false}};
+            InfectedPlotControl = new WpfPlot { Configuration = { DoubleClickBenchmark = false } };
             //Initialize Infected Plot Controls
-            VaccinatedPlotControl = new WpfPlot{Configuration = {DoubleClickBenchmark = false, LeftClickDragPan = false, LockHorizontalAxis = true, LockVerticalAxis = true, Zoom = false}};
+            VaccinatedPlotControl = new WpfPlot { Configuration = { DoubleClickBenchmark = false, LeftClickDragPan = false, LockHorizontalAxis = true, LockVerticalAxis = true, Zoom = false } };
             //Initialize collections
             Countries = new ObservableCollection<CountryVaccination>();
             CountriesPicked = new ObservableCollection<CountryVaccination>();
@@ -178,11 +173,36 @@ namespace Covid_19_Tracker.ViewModel
             SetUpdateTimer(600000);
             //Call data update
             UpdateData();
+            InitializePickedCountries();
         }
 
         #endregion
 
         #region Private Methods
+
+        private void InitializePickedCountries()
+        {
+            using var ctx = new TrackerDbContext();
+            if (!ctx.Countries.Any() || !ctx.Vaccinated.Any())
+            {
+                Delay(10000);
+            }
+            var cz = ctx.Countries.FirstOrDefault(x => x.Name == "Czechia");
+            if (cz == null) return;
+            var vaccinated = ctx.Vaccinated.Where(x => x.Id == cz.Id).OrderByDescending(x => x.Date).Select(x => (double)x.TotalVaccinations).First();
+            var cc = new CountryVaccination(cz.Name, cz.Population, vaccinated);
+            CountriesPicked.Add(cc);
+            UpdateVaccinatedData();
+        }
+
+        private static void Delay(int milliseconds)
+        {
+            var i = 0;
+            var delayTimer = new Timer {Interval = milliseconds, AutoReset = false};
+            delayTimer.Elapsed += (_, _) => i = 1;
+            delayTimer.Start();
+            while (i == 0) { };
+        }
 
         private static async Task<List<DateTime>> GetMzcrMissingDates()
         {
@@ -204,8 +224,8 @@ namespace Covid_19_Tracker.ViewModel
         private void PlotInfectedFactory()
         {
             using var ctx = new TrackerDbContext();
-            Array.Copy(ctx.Infected.Where(x => x.Source == "mzcr").OrderBy(x => x.Date).Select(x => (double)x.TotalCases).ToArray(),_mzcrValues, 0);
-            Array.Copy(ctx.Infected.Where(x => x.Source == "who").OrderBy(x => x.Date).Select(x => (double)x.TotalCases).ToArray(),_whoValues, 0);
+            Array.Copy(ctx.Infected.Where(x => x.Source == "mzcr").OrderBy(x => x.Date).Select(x => (double)x.TotalCases).ToArray(), _mzcrValues, 0);
+            Array.Copy(ctx.Infected.Where(x => x.Source == "who").OrderBy(x => x.Date).Select(x => (double)x.TotalCases).ToArray(), _whoValues, 0);
             _mzcrPlot = InfectedPlotControl.Plot.AddSignal(_mzcrValues, 1, Color.Crimson, label: "MZČR");
             _whoPlot = InfectedPlotControl.Plot.AddSignal(_whoValues, 1, Color.DarkTurquoise, "WHO");
             _mzcrPlot.OffsetX = ctx.Infected.MinAsync(r => r.Date).Result.ToOADate();
@@ -234,6 +254,7 @@ namespace Covid_19_Tracker.ViewModel
         {
             VaccinatedPlotControl.Plot.SetAxisLimits(yMin: 0, yMax: 100);
             VaccinatedPlotControl.Plot.XLabel("Země");
+            VaccinatedPlotControl.Plot.XAxis.TickLabelStyle(rotation: 15);
             VaccinatedPlotControl.Plot.YLabel("% proočkovanost");
             VaccinatedPlotControl.Plot.Title("Proočkovanost ve vybraných státech");
             VaccinatedPlotControl.RightClicked -= VaccinatedPlotControl.DefaultRightClickEvent;
@@ -244,39 +265,27 @@ namespace Covid_19_Tracker.ViewModel
             VaccinatedPlotControl.Plot.Clear();
             PlotVaccinatedFactory();
             var (values, positions, labels) = GetVaccinatedData();
-            _vaccinatedPlot = VaccinatedPlotControl.Plot.AddBar(values, positions);
+            VaccinatedPlotControl.Plot.AddBar(values, positions);
             VaccinatedPlotControl.Plot.XTicks(positions, labels);
-            VaccinatedPlotControl.Plot.SetAxisLimits(xMax: positions.Length-0.5);
+            VaccinatedPlotControl.Plot.SetAxisLimits(xMax: positions.Length - 0.5);
             VaccinatedPlotControl.Render();
         }
 
-        private (double[],double[],string[]) GetVaccinatedData()
+        private (double[], double[], string[]) GetVaccinatedData()
         {
             using var ctx = new TrackerDbContext();
-
-            var czechia = ctx.Vaccinated.First(x => x.Country.Name == "Czechia");
-            var czechiaCountry = ctx.Countries.First(x => x.Name == "Czechia");
-
-            var cz = new CountryVaccination(czechiaCountry.Name, czechiaCountry.Population, czechia.TotalVaccinations);
-
-            var count = CountriesPicked.Count+1;
-
+            var count = CountriesPicked.Count;
             var vaccinatedValues = new double[count];
             var vaccinatedPositions = new double[count];
             var vaccinatedLabels = new string[count];
-
-            vaccinatedValues[0] = double.Parse(cz.VaccinatedPercent.Split(" %")[0]);
-            vaccinatedPositions[0] = 0;
-            vaccinatedLabels[0] = cz.Name;
-
-            for (var i = 1; i < count; i++)
+            for (var i = 0; i < count; i++)
             {
-                vaccinatedValues[i] = double.Parse(CountriesPicked[i-1].VaccinatedPercent.Split(" %")[0]);
+                vaccinatedValues[i] = double.Parse(CountriesPicked[i].VaccinatedPercent.Split(" %")[0]);
                 vaccinatedPositions[i] = i;
-                vaccinatedLabels[i] = CountriesPicked[i-1].Name;
+                vaccinatedLabels[i] = CountriesPicked[i].Name;
             }
             return (vaccinatedValues, vaccinatedPositions, vaccinatedLabels);
-        }        
+        }
 
         private async void PlotControl_DoubleClick(object sender, EventArgs e)
         {
@@ -346,8 +355,9 @@ namespace Covid_19_Tracker.ViewModel
 
             foreach (var country in ctx.Countries)
             {
-                var vaccinated = await ctx.Vaccinated.Where(x => x.Id == country.Id).Select(x => (double)x.TotalVaccinations).Distinct().ToListAsync();
-                var cc = new CountryVaccination(country.Name, country.Population, vaccinated[0]);
+                if (country.Name == "Czechia") continue;
+                var vaccinated = await ctx.Vaccinated.Where(x => x.Id == country.Id).OrderByDescending(x => x.Date).Select(x => (double)x.TotalVaccinations).FirstAsync();
+                var cc = new CountryVaccination(country.Name, country.Population, vaccinated);
                 cc.PropertyChanged += CountryPropertyChanged;
                 countries.Add(cc);
             }
@@ -366,13 +376,7 @@ namespace Covid_19_Tracker.ViewModel
             {
                 CountriesPicked.Add(country);
             }
-            //Trochu na prasáka donucení akutalizace kolekce
             UpdateVaccinatedData();
-            var index = Countries.IndexOf(country);
-            Countries.Remove(country);
-            Countries.Insert(index, country);
-            
-
         }
 
         /// <summary>
