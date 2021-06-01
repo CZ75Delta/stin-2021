@@ -1,9 +1,12 @@
 ﻿using Covid_19_Tracker.Model;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Threading;
 
 namespace Covid_19_Tracker.View
 {
@@ -28,6 +31,7 @@ namespace Covid_19_Tracker.View
 
         private void DataGridCountries_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            
             if (e.AddedItems.Count <= 0) return;
             var selectedCountry = (CountryVaccination)e.AddedItems[0];
             if (selectedCountry != null && selectedCountry.IsPicked)
@@ -50,9 +54,36 @@ namespace Covid_19_Tracker.View
             }
         }
 
-        private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+
+        /// <summary>
+        /// Působí jako filtr zemí jenž zobrazí odpovídající výsledky dle textu v poli
+        /// Reaguje na každou změnu v poli
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Tb_OnTextChanged(object sender, TextChangedEventArgs e)
         {
-            throw new NotImplementedException();
+            var text = Tb.Text;
+            
+            if (string.IsNullOrEmpty(text))
+            {
+                CountriesGrid.Items.Filter = null;
+            }
+            else
+            {
+                var customFilter = new Predicate<object>(item => !(item is CountryVaccination country) || country.Name.Contains(text));
+                CountriesGrid.Items.Filter = customFilter;
+            }
+            CountriesGrid.Items.Refresh();
+        }
+        /// <summary>
+        /// Vymaže všechen text z filtrovacího pole
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ButtonClearTextBoxFilter(object sender, RoutedEventArgs e)
+        {
+            Tb.Text = "";
         }
     }
 }
