@@ -51,5 +51,10 @@ namespace Covid_19_Tracker.View
 
             }
         }
+
+        private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
