@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using Covid_19_Tracker.ViewModel;
 
 namespace Covid_19_Tracker.View
 {
@@ -24,6 +25,9 @@ namespace Covid_19_Tracker.View
         {
             EndDatePicker.Visibility = InfectedTab.IsSelected ? Visibility.Visible : Visibility.Hidden;
             EndDatePickerLabel.Visibility = InfectedTab.IsSelected ? Visibility.Visible : Visibility.Hidden;
+            if (!VaccinatedTab.IsSelected) return;
+            var vm = (MainViewModel)DataContext;
+            vm.InfectedInitCommand.Execute(null);
         }
 
         private void DataGridCountries_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -68,7 +72,7 @@ namespace Covid_19_Tracker.View
             }
             else
             {
-                var customFilter = new Predicate<object>(item => !(item is CountryVaccination country) || country.Name.Contains(text));
+                var customFilter = new Predicate<object>(item => !(item is CountryVaccination country) || country.Name.ToLowerInvariant().Contains(text.ToLowerInvariant()));
                 CountriesGrid.Items.Filter = customFilter;
             }
             CountriesGrid.Items.Refresh();

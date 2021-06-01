@@ -40,7 +40,7 @@
                     </DataGrid>
                 </Grid>
             </TabItem>
-            <TabItem Header="Proočkovanost ve světě">
+            <TabItem Header="Proočkovanost ve světě" x:Name="VaccinatedTab">
                 <Grid Background="#FFE5E5E5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="5*"/>
