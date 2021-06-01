@@ -2,9 +2,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Threading;
 
 namespace Covid_19_Tracker.View
@@ -30,6 +32,7 @@ namespace Covid_19_Tracker.View
 
         private void DataGridCountries_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            
             if (e.AddedItems.Count <= 0) return;
             var selectedCountry = (CountryVaccination)e.AddedItems[0];
             if (selectedCountry != null && selectedCountry.IsPicked)
@@ -56,5 +59,28 @@ namespace Covid_19_Tracker.View
         {
             throw new NotImplementedException();
         }
+        
+
+        private void Tb_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            var text = Tb.Text;
+            
+            if (string.IsNullOrEmpty(text))
+            {
+                Grid.Items.Filter = null;
+            }
+            else
+            {
+                var customFilter = new Predicate<object>(item =>
+                {
+                    item = item as CountryVaccination;
+                    return item == null || item.Name.Contains(text);
+                });
+                Grid.Items.Filter = customFilter;
+
+            }
+            
+        }
+
     }
 }
