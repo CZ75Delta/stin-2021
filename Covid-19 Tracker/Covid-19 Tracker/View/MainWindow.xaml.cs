@@ -55,12 +55,13 @@ namespace Covid_19_Tracker.View
             }
         }
 
-        private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-        
 
+        /// <summary>
+        /// Působí jako filtr zemí jenž zobrazí odpovídající výsledky dle textu v poli
+        /// Reaguje na každou změnu v poli
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Tb_OnTextChanged(object sender, TextChangedEventArgs e)
         {
             var text = Tb.Text;
@@ -81,6 +82,14 @@ namespace Covid_19_Tracker.View
             }
             
         }
-
+        /// <summary>
+        /// Vymaže všechen text z filtrovacího pole
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ButtonClearTextBoxFilter(object sender, RoutedEventArgs e)
+        {
+            Tb.Text = "";
+        }
     }
 }
