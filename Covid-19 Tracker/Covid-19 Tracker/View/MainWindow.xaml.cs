@@ -68,19 +68,14 @@ namespace Covid_19_Tracker.View
             
             if (string.IsNullOrEmpty(text))
             {
-                Grid.Items.Filter = null;
+                CountriesGrid.Items.Filter = null;
             }
             else
             {
-                var customFilter = new Predicate<object>(item =>
-                {
-                    item = item as CountryVaccination;
-                    return item == null || item.Name.Contains(text);
-                });
-                Grid.Items.Filter = customFilter;
-
+                var customFilter = new Predicate<object>(item => !(item is CountryVaccination country) || country.Name.Contains(text));
+                CountriesGrid.Items.Filter = customFilter;
             }
-            
+            CountriesGrid.Items.Refresh();
         }
         /// <summary>
         /// Vymaže všechen text z filtrovacího pole

@@ -352,7 +352,6 @@ namespace Covid_19_Tracker.ViewModel
                 var cc = new CountryVaccination(country.Name, country.Population, vaccinated[0]);
                 cc.PropertyChanged += CountryPropertyChanged;
                 countries.Add(cc);
-
             }
             Countries = new ObservableCollection<CountryVaccination>(countries);
         }
