@@ -151,14 +151,27 @@ namespace Covid_19_Tracker.ViewModel
 
         private void VaccinatedInit()
         {
-            if (CountriesPicked.Count > 0) return;
             using var ctx = new TrackerDbContext();
-            var cz = ctx.Countries.FirstOrDefault(x => x.Name == "Czechia");
-            if (cz == null) return;
-            var vaccinated = ctx.Vaccinated.Where(x => x.Id == cz.Id).OrderByDescending(x => x.Date).Select(x => (double)x.TotalVaccinations).First();
-            var cc = new CountryVaccination(cz.Name, cz.Population, vaccinated);
-            CountriesPicked.Add(cc);
-            UpdateVaccinatedData();
+            if (CountriesPicked.Count > 0)
+            {
+                var cz = CountriesPicked.FirstOrDefault(x => x.Name == "Czechia");
+                var czIndex = CountriesPicked.IndexOf(cz);
+                var czDb = ctx.Countries.FirstOrDefault(x => x.Name == "Czechia");
+                if (czDb == null) return;
+                var vaccinated = ctx.Vaccinated.Where(x => x.Id == czDb.Id).OrderByDescending(x => x.Date).Select(x => (double)x.TotalVaccinations).First();
+                var czVac = new CountryVaccination(czDb.Name, czDb.Population, vaccinated);
+                CountriesPicked.RemoveAt(czIndex);
+                CountriesPicked.Insert(czIndex, czVac);
+            }
+            else
+            {
+                var cz = ctx.Countries.FirstOrDefault(x => x.Name == "Czechia");
+                if (cz == null) return;
+                var vaccinated = ctx.Vaccinated.Where(x => x.Id == cz.Id).OrderByDescending(x => x.Date).Select(x => (double)x.TotalVaccinations).First();
+                var czVac = new CountryVaccination(cz.Name, cz.Population, vaccinated);
+                CountriesPicked.Add(czVac);
+                UpdateVaccinatedData();
+            }
         }
 
         #endregion

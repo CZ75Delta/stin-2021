@@ -6,7 +6,7 @@
         xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
         xmlns:mvm="clr-namespace:Covid_19_Tracker.ViewModel"
         mc:Ignorable="d"
-        Title="Covid-19 Tracker" Height="600" Width="1000" MinHeight="600" MinWidth="800" IsEnabled="{Binding UiEnabled}">
+        Title="Covid-19 Tracker" Height="600" Width="1000" MinHeight="600" MinWidth="800" IsEnabled="{Binding UiEnabled}" Icon="/Resources/icon.ico">
     <Window.DataContext>
         <mvm:MainViewModel />
     </Window.DataContext>

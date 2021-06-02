@@ -5,6 +5,8 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <RootNamespace>Covid_19_Tracker</RootNamespace>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
+    <StartupObject>Covid_19_Tracker.App</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
