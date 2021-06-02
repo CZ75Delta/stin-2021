@@ -87,5 +87,10 @@ namespace Covid_19_Tracker.View
         {
             Tb.Text = "";
         }
+
+        private void ButtonAktualizace_Click(object sender, RoutedEventArgs e)
+        {
+            VaccinationQueue.Clear();
+        }
     }
 }

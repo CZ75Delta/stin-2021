@@ -124,6 +124,7 @@ namespace Covid_19_Tracker.ViewModel
                       await UpdateCountries();
                       await PlotInfectedData();
                       if (CountriesPicked.Count > 0) UpdateVaccinatedData();
+                      CountriesPicked.Clear();
                   });
             }
             else
