@@ -91,6 +91,8 @@ namespace Covid_19_Tracker.View
         private void ButtonAktualizace_Click(object sender, RoutedEventArgs e)
         {
             VaccinationQueue.Clear();
+            CountriesGrid.Items.Refresh();
+            
         }
     }
 }
