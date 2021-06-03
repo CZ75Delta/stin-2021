@@ -95,9 +95,7 @@ namespace Covid_19_Tracker.ViewModel
                   {
                       //Get and save WHO Vaccinations + Country data
                       var listWho = ProcessData.ProcessWhoVaccinated(ApiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv").Result).Result;
-                      await DataToDb.InitializeCountries(listWho);
-                      await DataToDb.SaveToDb(listWho);
-                      //Get and save MZČR Summary
+                      await DataToDb.InitializeCountries(listWho); //Get and save MZČR Summary
                       await DataToDb.SavetoDb(ProcessData.ProcessMzcr(ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json").Result).Result);
                       var mzcrMissing = GetMzcrMissingDates().Result;
                       if (mzcrMissing.Count > 0)
@@ -124,6 +122,8 @@ namespace Covid_19_Tracker.ViewModel
                       await UpdateCountries();
                       await PlotInfectedData();
                       if (CountriesPicked.Count > 0) UpdateVaccinatedData();
+                      CountriesPicked.Clear();
+                      
                   });
             }
             else
@@ -426,7 +426,7 @@ namespace Covid_19_Tracker.ViewModel
         /// </summary>
         private void UpdateDataEvent(object sender, ElapsedEventArgs e)
         {
-            UpdateData();
+            //UpdateData();
         }
 
         #endregion

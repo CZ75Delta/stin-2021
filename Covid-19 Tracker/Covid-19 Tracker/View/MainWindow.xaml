@@ -6,7 +6,7 @@
         xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
         xmlns:mvm="clr-namespace:Covid_19_Tracker.ViewModel"
         mc:Ignorable="d"
-        Title="Covid-19 Tracker" Height="600" Width="1000" MinHeight="600" MinWidth="800" IsEnabled="{Binding UiEnabled}" Icon="/Resources/icon.ico">
+        Title="Covid-19 Tracker" Height="600" Width="1000" MinHeight="600" MinWidth="800" IsEnabled="{Binding UiEnabled}" Icon="../Resources/icon.ico">
     <Window.DataContext>
         <mvm:MainViewModel />
     </Window.DataContext>
@@ -118,7 +118,7 @@
                 </StatusBarItem>
                 <Separator Grid.Column="3" />
                 <StatusBarItem Grid.Column="4">
-                    <Button Width="80" Height="20" Content="Aktualizovat" Margin="2,-1,0,0" Command="{Binding RefreshCommand}" IsEnabled="{Binding UpdateEnabled}"/>
+                    <Button Width="80" Height="20" Content="Aktualizovat" Margin="2,-1,0,0" Click="ButtonAktualizace_Click" Command="{Binding RefreshCommand}" IsEnabled="{Binding UpdateEnabled}"/>
                 </StatusBarItem>
             </StatusBar>
         </DockPanel>
