@@ -93,38 +93,74 @@ namespace Covid_19_Tracker.ViewModel
             Log.Information("Starting update.");
             if (await CheckInternetConnection.CheckForInternetConnection(1000))
             {
-                PickEnabled = false;
-                CountriesPicked.Clear();
-                Countries.Clear();
-                _lastUpdate = DateTime.Now;
+
                 _ = await Task.Factory.StartNew(async () =>
                   {
-                      // Get and save WHO Vaccinations + Country data
+                      // Get and save WHO Vaccinations + Country data (1)
                       var listWho = ProcessData.ProcessWhoVaccinated(ApiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv").Result).Result;
-                      if (listWho == null) return;
+                      if (listWho == null)
+                      {
+                          ProgressText = "aktualizace selhala, zkontrolujte internet";
+                          Log.Information("Update Failed.");
+                          PickEnabled = true;
+                          _updating = ProgressBar = false;
+                          return;
+                      }
                       
+                      // MZČR (2)
+                      var listMzcr = ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json").Result;
+                      if (listMzcr == null) 
+                      {
+                          ProgressText = "aktualizace selhala, zkontrolujte internet";
+                          Log.Information("Update Failed.");
+                          PickEnabled = true;
+                          _updating = ProgressBar = false;
+                          return;
+                      }
+                        
+                      // (3)
+                      var mzcrHistory = await ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/nakazeni-vyleceni-umrti-testy.json");
+                      if (mzcrHistory == null) 
+                      {
+                          ProgressText = "aktualizace selhala, zkontrolujte internet";
+                          Log.Information("Update Failed.");
+                          PickEnabled = true;
+                          _updating = ProgressBar = false;
+                          return;
+                      }
+
+                      // Get and save WHO Infections (4)
+                      var whoInfections = await ApiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv");
+                      if (whoInfections == null) 
+                      {
+                          ProgressText = "aktualizace selhala, zkontrolujte internet";
+                          Log.Information("Update Failed.");
+                          PickEnabled = true;
+                          _updating = ProgressBar = false;
+                          return;
+                      }
+                      
+                      //clear předchozích dat
+                      PickEnabled = false;
+                      CountriesPicked.Clear();
+                      Countries.Clear();
+                      _lastUpdate = DateTime.Now;
+                      // (1)
                       await DataToDb.InitializeCountries(listWho);
                       await DataToDb.SaveToDb(listWho);
-                      // MZČR
-                      var listMzcr = ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json").Result;
-                      if (listMzcr == null) return;
-
+                      // (2)
                       await DataToDb.SavetoDb(ProcessData.ProcessMzcr(listMzcr).Result);
                       var mzcrMissing = GetMzcrMissingDates().Result;
+                      // (3)
                       if (mzcrMissing.Count > 0)
                       {
-                          var mzcrHistory = await ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/nakazeni-vyleceni-umrti-testy.json");
-                          if (mzcrHistory == null) return;
-                          
                           foreach (var missingDate in mzcrMissing)
                           {
                               await DataToDb.SavetoDb(ProcessData.ProcessMzcrDate(mzcrHistory, missingDate).Result);
                           }
                       }
-                      // Get and save WHO Infections
-                      var whoInfections = await ApiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv");
-                      if (whoInfections == null) return;
-                      
+  
+                      // (4)
                       await DataToDb.SavetoDb(ProcessData.ProcessWhoInfected(whoInfections).Result);
                       var whoMissing = GetWhoMissingDates().Result;
                       if (whoMissing.Count > 0)

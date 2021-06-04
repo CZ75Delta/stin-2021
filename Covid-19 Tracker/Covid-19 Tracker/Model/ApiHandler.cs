@@ -30,6 +30,7 @@ namespace Covid_19_Tracker.Model
             }
             catch (Exception e)
             {
+                /*throw new Exception();*/
                 return null;
             }
         }
