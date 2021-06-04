@@ -125,7 +125,6 @@ namespace Covid_19_Tracker.ViewModel
                         return xx;
                     });
 
-
                     var mzcrHistory = await Task.Run(async () =>
                     {
                         // (3)
@@ -163,8 +162,6 @@ namespace Covid_19_Tracker.ViewModel
                 {
                     ProgressText = "aktualizace selhala";
                     Log.Information("Update Failed. -> ", e.Message);
-                    PickEnabled = true;
-                    _updating = ProgressBar = false;
                     UpdateEnabled = false;
                     SetRetryTextTimer();
                     return;
