@@ -76,7 +76,6 @@ namespace Covid_19_Tracker.ViewModel
 
         public Command RefreshCommand { get; }
         public Command OnDateChangedCommand { get; }
-        public Command InfectedInitCommand { get; }
 
         #endregion
 
@@ -200,7 +199,6 @@ namespace Covid_19_Tracker.ViewModel
             //Initialize View Commands
             RefreshCommand = new Command(_ => true, _ => UpdateData());
             OnDateChangedCommand = new Command(_ => true, _ => OnDateChanged());
-            InfectedInitCommand = new Command(_ => true, _ => VaccinatedInit());
             //Set Progress Text
             ProgressText = "Poslední aktualizace v " + DateTime.Now.ToString("HH:mm");
             //Set Update Timer
