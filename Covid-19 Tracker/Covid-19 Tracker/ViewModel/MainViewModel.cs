@@ -95,6 +95,7 @@ namespace Covid_19_Tracker.ViewModel
             {
                 PickEnabled = false;
                 CountriesPicked.Clear();
+                Countries.Clear();
                 VaccinatedInit();
                 _lastUpdate = DateTime.Now;
                 _ = await Task.Factory.StartNew(async () =>
