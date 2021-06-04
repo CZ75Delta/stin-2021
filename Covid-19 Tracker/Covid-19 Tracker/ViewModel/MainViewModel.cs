@@ -45,6 +45,7 @@ namespace Covid_19_Tracker.ViewModel
         private bool _progressBar;
         private bool _updateEnabled;
         private bool _uiEnabled;
+        private bool _pickEnabled;
         private bool _updating;
         private string _progressText;
         private double[] _mzcrValues = new double[730];
@@ -58,6 +59,8 @@ namespace Covid_19_Tracker.ViewModel
         public bool ProgressBar { get => _progressBar; private set { _progressBar = value; OnPropertyChanged(); } }
         public bool UpdateEnabled { get => _updateEnabled; private set { _updateEnabled = value; OnPropertyChanged(); } }
         public bool UiEnabled { get => _uiEnabled; private set { _uiEnabled = value; OnPropertyChanged(); } }
+        public bool PickEnabled { get => _pickEnabled; private set { _pickEnabled = value; OnPropertyChanged(); } }
+
         public ObservableCollection<Infected> Infected { get => _infected; private set { _infected = value; OnPropertyChanged(); } }
         public ObservableCollection<CountryVaccination> Countries { get => _countries; private set { _countries = value; OnPropertyChanged(); } }
         public ObservableCollection<CountryVaccination> CountriesPicked { get => _countriesPicked; private init { _countriesPicked = value; OnPropertyChanged(); } }
@@ -90,6 +93,9 @@ namespace Covid_19_Tracker.ViewModel
             Log.Information("Starting update.");
             if (await CheckInternetConnection.CheckForInternetConnection(1000))
             {
+                PickEnabled = false;
+                CountriesPicked.Clear();
+                VaccinatedInit();
                 _lastUpdate = DateTime.Now;
                 _ = await Task.Factory.StartNew(async () =>
                   {
@@ -122,7 +128,6 @@ namespace Covid_19_Tracker.ViewModel
                       await UpdateCountries();
                       await PlotInfectedData();
                       if (CountriesPicked.Count > 0) UpdateVaccinatedData();
-                      CountriesPicked.Clear();
                       
                   });
             }
@@ -135,6 +140,7 @@ namespace Covid_19_Tracker.ViewModel
             Log.Information("Update finished.");
             ProgressBar = false;
             UiEnabled = true;
+            PickEnabled = true;
             _updating = false;
         }
 

@@ -55,7 +55,7 @@
                     <ContentControl Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" Content="{Binding VaccinatedPlotControl}"/>
                     <TextBox Grid.Column="1" Grid.Row="0" x:Name="Tb" TextChanged="Tb_OnTextChanged"/>
                     <Button Grid.Column="2" Grid.Row="0" Content="X" Width="22" Click="ButtonClearTextBoxFilter"></Button>
-                    <DataGrid x:Name="CountriesGrid" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding Countries}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserResizeRows="False" SelectionMode="Single" CanUserAddRows="False" IsReadOnly="True" SelectionChanged="DataGridCountries_SelectionChanged">
+                    <DataGrid x:Name="CountriesGrid" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding Countries}" IsEnabled="{Binding PickEnabled}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserResizeRows="False" SelectionMode="Single" CanUserAddRows="False" IsReadOnly="True" SelectionChanged="DataGridCountries_SelectionChanged">
                         <DataGrid.RowStyle>
                             <Style TargetType="DataGridRow">
                                 <Style.Triggers>
@@ -76,7 +76,7 @@
                             <DataGridTextColumn Header="Seřadit státy" Width="1*" Binding="{Binding Name}"/>
                         </DataGrid.Columns>
                     </DataGrid>
-                    <DataGrid Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding CountriesPicked}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" CanUserResizeRows="False" Grid.Row="2">
+                    <DataGrid Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding CountriesPicked}" IsEnabled="{Binding PickEnabled}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" CanUserResizeRows="False" Grid.Row="2">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Stát" Width="5*" Binding="{Binding Name}" />
                             <DataGridTextColumn Header="Očkování" Width="3*" Binding="{Binding VaccinatedCounter}" />
