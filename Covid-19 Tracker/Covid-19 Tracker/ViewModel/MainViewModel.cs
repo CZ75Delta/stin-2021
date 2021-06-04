@@ -104,11 +104,16 @@ namespace Covid_19_Tracker.ViewModel
                       await DataToDb.InitializeCountries(listWho);
                       await DataToDb.SaveToDb(listWho);
                       // MZČR
-                      await DataToDb.SavetoDb(ProcessData.ProcessMzcr(ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json").Result).Result);
+                      var listMzcr = ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json").Result;
+                      if (listMzcr == null) return;
+
+                      await DataToDb.SavetoDb(ProcessData.ProcessMzcr(listMzcr).Result);
                       var mzcrMissing = GetMzcrMissingDates().Result;
                       if (mzcrMissing.Count > 0)
                       {
                           var mzcrHistory = await ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/nakazeni-vyleceni-umrti-testy.json");
+                          if (mzcrHistory == null) return;
+                          
                           foreach (var missingDate in mzcrMissing)
                           {
                               await DataToDb.SavetoDb(ProcessData.ProcessMzcrDate(mzcrHistory, missingDate).Result);
@@ -116,6 +121,8 @@ namespace Covid_19_Tracker.ViewModel
                       }
                       // Get and save WHO Infections
                       var whoInfections = await ApiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv");
+                      if (whoInfections == null) return;
+                      
                       await DataToDb.SavetoDb(ProcessData.ProcessWhoInfected(whoInfections).Result);
                       var whoMissing = GetWhoMissingDates().Result;
                       if (whoMissing.Count > 0)

@@ -30,7 +30,7 @@ namespace Covid_19_Tracker.Model
             }
             catch (Exception)
             {
-                return string.Empty;
+                throw new Exception();
             }
         }
     }
