@@ -25,7 +25,6 @@ namespace Covid_19_Tracker.View
         {
             EndDatePicker.Visibility = InfectedTab.IsSelected ? Visibility.Visible : Visibility.Hidden;
             EndDatePickerLabel.Visibility = InfectedTab.IsSelected ? Visibility.Visible : Visibility.Hidden;
-            if (!VaccinatedTab.IsSelected) return;
         }
 
         private void DataGridCountries_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -90,7 +89,6 @@ namespace Covid_19_Tracker.View
         {
             VaccinationQueue.Clear();
             CountriesGrid.Items.Refresh();
-            
         }
     }
 }
