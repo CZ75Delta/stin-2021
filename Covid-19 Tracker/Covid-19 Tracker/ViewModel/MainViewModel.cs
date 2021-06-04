@@ -101,6 +101,8 @@ namespace Covid_19_Tracker.ViewModel
                   {
                       // Get and save WHO Vaccinations + Country data
                       var listWho = ProcessData.ProcessWhoVaccinated(ApiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv").Result).Result;
+                      if (listWho == null) return;
+                      
                       await DataToDb.InitializeCountries(listWho);
                       await DataToDb.SaveToDb(listWho);
                       // MZČR

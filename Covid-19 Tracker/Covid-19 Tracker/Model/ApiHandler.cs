@@ -28,9 +28,9 @@ namespace Covid_19_Tracker.Model
                     return content;
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                throw new Exception();
+                return null;
             }
         }
     }
