@@ -14,6 +14,7 @@ namespace Covid_19_Tracker.Model
             try
             {
                 var request = (HttpWebRequest)WebRequest.Create(url);
+                
                 var response = (HttpWebResponse)request.GetResponseAsync().Result;
 
                 if ("gzip".Equals(response.ContentEncoding))
