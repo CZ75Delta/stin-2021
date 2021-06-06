@@ -5,7 +5,7 @@ using Serilog;
 
 namespace Covid_19_Tracker.Model
 {
-    public class CheckInternetConnection
+    public static class CheckInternetConnection
     {
         public static Task<bool> CheckForInternetConnection(int timeoutMs = 10000, string url = null)
         {

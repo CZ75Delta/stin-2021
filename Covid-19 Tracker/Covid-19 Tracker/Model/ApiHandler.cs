@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Text;
@@ -11,27 +10,18 @@ namespace Covid_19_Tracker.Model
     {
         public static async Task<string> DownloadFromUrl(string url)
         {
-            if (!await CheckInternetConnection.CheckForInternetConnection(1000)) return null;
             try
             {
                 var request = (HttpWebRequest) WebRequest.Create(url);
-                request.Timeout = 15000;
+                request.Timeout = 10000;
+                request.ReadWriteTimeout = 10000;
                 var response = (HttpWebResponse) await request.GetResponseAsync();
 
-                if ("gzip".Equals(response.ContentEncoding))
-                {
-                    Stream stream = new GZipStream(response.GetResponseStream(), CompressionMode.Decompress);
-                    var content = await new StreamReader(stream, Encoding.UTF8).ReadToEndAsync();
-                    return content;
-                }
-                else
-                {
-                    var content =
-                        await new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEndAsync();
-                    return content;
-                }
+                if (!"gzip".Equals(response.ContentEncoding)) return await new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEndAsync();
+                Stream stream = new GZipStream(response.GetResponseStream(), CompressionMode.Decompress);
+                return await new StreamReader(stream, Encoding.UTF8).ReadToEndAsync();
             }
-            catch (Exception)
+            catch
             {
                 return null;
             }

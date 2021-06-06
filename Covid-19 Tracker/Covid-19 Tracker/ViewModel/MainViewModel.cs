@@ -97,6 +97,8 @@ namespace Covid_19_Tracker.ViewModel
             if (await CheckInternetConnection.CheckForInternetConnection(1000))
             {
                 PickEnabled = false;
+                CountriesPicked.Clear();
+                Countries.Clear();
                 try
                 {
                     //TODO otestovat vypojení při aktualizaci
@@ -111,8 +113,6 @@ namespace Covid_19_Tracker.ViewModel
                     if (whoVaccinations == null || mzcrData == null || mzcrHistory == null || whoInfections == null) throw new HttpRequestException();
 
                     _lastUpdate = DateTime.Now;
-                    CountriesPicked.Clear();
-                    Countries.Clear();
 
                     await Task.Run( async () => await SaveData(mzcrData, whoVaccinations, mzcrHistory, whoInfections));
                 }
