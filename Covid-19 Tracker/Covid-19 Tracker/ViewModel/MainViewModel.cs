@@ -124,17 +124,18 @@ namespace Covid_19_Tracker.ViewModel
                     UpdateData();
                     return;
                 }
+                VaccinatedInit();
+                ProgressBar = false;
+                PickEnabled = true;
+                ProgressText = "Poslední aktualizace v " + _lastUpdate.ToString("HH:mm");
+                Log.Information("Update finished.");
             }
             else
             {
                 UpdateEnabled = false;
                 SetRetryTextTimer();
             }
-            VaccinatedInit();
-            ProgressText = "Poslední aktualizace v " + _lastUpdate.ToString("HH:mm");
-            Log.Information("Update finished.");
-            PickEnabled = true;
-            _updating = ProgressBar = false;
+            _updating = false;
         }
         
         private async Task SaveData(string listMzcr, string whoVaccinations, string mzcrHistory, string whoInfections)
