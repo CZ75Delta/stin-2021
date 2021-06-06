@@ -102,13 +102,13 @@ namespace Covid_19_Tracker.ViewModel
                 try
                 {
                     //TODO otestovat vypojení při aktualizaci
-                    var whoVaccinations = await Task.Run(async () => await ApiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv"));
+                    var whoVaccinations = await Task.Run(() => ApiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv"));
                     
-                    var mzcrData = await Task.Run(async () => await ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json"));
+                    var mzcrData = await Task.Run(() => ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json"));
 
-                    var mzcrHistory = await Task.Run(async () => await ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/nakazeni-vyleceni-umrti-testy.json"));
+                    var mzcrHistory = await Task.Run(() => ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/nakazeni-vyleceni-umrti-testy.json"));
 
-                    var whoInfections = await Task.Run(async () => await ApiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv"));
+                    var whoInfections = await Task.Run(() => ApiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv"));
 
                     if (whoVaccinations == null || mzcrData == null || mzcrHistory == null || whoInfections == null) throw new HttpRequestException();
 
