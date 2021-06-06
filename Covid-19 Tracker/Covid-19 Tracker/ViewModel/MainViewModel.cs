@@ -14,6 +14,7 @@ using ScottPlot;
 using ScottPlot.Plottable;
 using Serilog;
 using System.ComponentModel;
+using System.Net;
 using System.Net.Http;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -98,78 +99,29 @@ namespace Covid_19_Tracker.ViewModel
                 try
                 {
                     //TODO otestovat vypojení při aktualizaci
-                    var listWho = await Task.Run(async () =>
-                    {
-                        // Get and save WHO Vaccinations + Country data (1)
-                        var xx = ProcessData.ProcessWhoVaccinated(ApiHandler
-                            .DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv").Result).Result;
-                        if (xx == null)
-                        {
-                            throw new HttpRequestException();
-                        }
+                    var whoVaccinations = await Task.Run(async () => await ApiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv"));
+                    
+                    var mzcrData = await Task.Run(async () => await ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json"));
 
-                        return xx;
-                    });
+                    var mzcrHistory = await Task.Run(async () => await ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/nakazeni-vyleceni-umrti-testy.json"));
 
-                    var listMzcr = await Task.Run(async () =>
-                    {
-                        // MZČR (2)
-                        var xx = ApiHandler
-                            .DownloadFromUrl(
-                                "https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json").Result;
-                        if (xx == null)
-                        {
-                            throw new HttpRequestException();
-                        }
+                    var whoInfections = await Task.Run(async () => await ApiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv"));
 
-                        return xx;
-                    });
-
-                    var mzcrHistory = await Task.Run(async () =>
-                    {
-                        // (3)
-                        var xx = ApiHandler.DownloadFromUrl(
-                            "https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/nakazeni-vyleceni-umrti-testy.json");
-                        if (xx == null)
-                        {
-                            throw new HttpRequestException();
-                        }
-
-                        return xx;
-                    }).Result;
-
-                    var whoInfections = await Task.Run(async () =>
-                    {
-                        // Get and save WHO Infections (4)
-                        var xx = ApiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv");
-                        if (xx == null)
-                        {
-                            throw new HttpRequestException();
-                        }
-
-                        return xx;
-
-                    }).Result;
-
+                    if (whoVaccinations == null || mzcrData == null || mzcrHistory == null || whoInfections == null) throw new HttpRequestException();
                     PickEnabled = false;
                     CountriesPicked.Clear();
                     Countries.Clear();
                     _lastUpdate = DateTime.Now;
 
-                    await Task.Run( async () => SaveData(listMzcr, listWho, mzcrHistory, whoInfections));
+                    await Task.Run( async () => await SaveData(mzcrData, whoVaccinations, mzcrHistory, whoInfections));
                 }
-                catch (HttpRequestException e)
+                catch (Exception ex) when (ex is WebException or HttpRequestException)
                 {
-                    ProgressText = "aktualizace selhala";
-                    Log.Information("Update Failed. -> ", e.Message);
-                    UpdateEnabled = false;
-                    SetRetryTextTimer();
+                    ProgressText = "Aktualizace selhala.";
+                    Log.Information("Update Failed. -> ", ex.Message);
+                    _updating = false;
+                    UpdateData();
                     return;
-                }
-                finally 
-                {
-                    PickEnabled = true;
-                    _updating = ProgressBar = false;
                 }
             }
             else
@@ -184,10 +136,10 @@ namespace Covid_19_Tracker.ViewModel
             _updating = ProgressBar = false;
         }
         
-        private async void SaveData(string listMzcr, List<Dictionary<string, string>> listWho, string mzcrHistory,
-            string whoInfections)
+        private async Task SaveData(string listMzcr, string whoVaccinations, string mzcrHistory, string whoInfections)
         {
             // (1)
+            var listWho = await ProcessData.ProcessWhoVaccinated(whoVaccinations);
             await DataToDb.InitializeCountries(listWho);
             await DataToDb.SaveToDb(listWho);
             // (2)

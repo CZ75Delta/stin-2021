@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace Covid_19_Tracker.Model
 {
-    public class ApiHandler
+    public static class ApiHandler
     {
         public static async Task<string> DownloadFromUrl(string url)
         {
             try
             {
                 var request = (HttpWebRequest)WebRequest.Create(url);
-                
+                request.Timeout = 15000;
                 var response = (HttpWebResponse)request.GetResponseAsync().Result;
 
                 if ("gzip".Equals(response.ContentEncoding))
@@ -29,9 +29,8 @@ namespace Covid_19_Tracker.Model
                     return content;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                /*throw new Exception();*/
                 return null;
             }
         }
