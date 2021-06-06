@@ -14,6 +14,9 @@ using ScottPlot;
 using ScottPlot.Plottable;
 using Serilog;
 using System.ComponentModel;
+using System.Net;
+using System.Net.Http;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 
 namespace Covid_19_Tracker.ViewModel
@@ -96,52 +99,79 @@ namespace Covid_19_Tracker.ViewModel
                 PickEnabled = false;
                 CountriesPicked.Clear();
                 Countries.Clear();
-                _lastUpdate = DateTime.Now;
-                _ = await Task.Factory.StartNew(async () =>
-                  {
-                      // Get and save WHO Vaccinations + Country data
-                      var listWho = ProcessData.ProcessWhoVaccinated(ApiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv").Result).Result;
-                      await DataToDb.InitializeCountries(listWho);
-                      await DataToDb.SaveToDb(listWho);
-                      // MZČR
-                      await DataToDb.SavetoDb(ProcessData.ProcessMzcr(ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json").Result).Result);
-                      var mzcrMissing = GetMzcrMissingDates().Result;
-                      if (mzcrMissing.Count > 0)
-                      {
-                          var mzcrHistory = await ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/nakazeni-vyleceni-umrti-testy.json");
-                          foreach (var missingDate in mzcrMissing)
-                          {
-                              await DataToDb.SavetoDb(ProcessData.ProcessMzcrDate(mzcrHistory, missingDate).Result);
-                          }
-                      }
-                      // Get and save WHO Infections
-                      var whoInfections = await ApiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv");
-                      await DataToDb.SavetoDb(ProcessData.ProcessWhoInfected(whoInfections).Result);
-                      var whoMissing = GetWhoMissingDates().Result;
-                      if (whoMissing.Count > 0)
-                      {
-                          foreach (var missingDate in whoMissing)
-                          {
-                              await DataToDb.SavetoDb(ProcessData.ProcessWhoInfected(whoInfections, missingDate).Result);
-                          }
-                      }
-                      await DataToDb.FixDailyInfected();
-                      await UpdateInfectedToDate();
-                      await UpdateCountries();
-                      await PlotInfectedData();
-                  });
+                try
+                {
+                    //TODO otestovat vypojení při aktualizaci
+                    var whoVaccinations = await Task.Run(() => ApiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv"));
+                    
+                    var mzcrData = await Task.Run(() => ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json"));
+
+                    var mzcrHistory = await Task.Run(() => ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/nakazeni-vyleceni-umrti-testy.json"));
+
+                    var whoInfections = await Task.Run(() => ApiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv"));
+
+                    if (whoVaccinations == null || mzcrData == null || mzcrHistory == null || whoInfections == null) throw new HttpRequestException();
+
+                    _lastUpdate = DateTime.Now;
+
+                    await Task.Run( async () => await SaveData(mzcrData, whoVaccinations, mzcrHistory, whoInfections));
+                }
+                catch (Exception ex) when (ex is WebException or HttpRequestException)
+                {
+                    ProgressText = "Aktualizace selhala.";
+                    Log.Information("Update Failed. -> ", ex.Message);
+                    _updating = false;
+                    UpdateData();
+                    return;
+                }
+                VaccinatedInit();
+                ProgressBar = false;
+                PickEnabled = true;
+                ProgressText = "Poslední aktualizace v " + _lastUpdate.ToString("HH:mm");
+                Log.Information("Update finished.");
             }
             else
             {
                 UpdateEnabled = false;
                 SetRetryTextTimer();
             }
-            VaccinatedInit();
-            ProgressText = "Poslední aktualizace v " + _lastUpdate.ToString("HH:mm");
-            Log.Information("Update finished.");
-            PickEnabled = true;
-            _updating = ProgressBar = false;
+            _updating = false;
         }
+        
+        private async Task SaveData(string listMzcr, string whoVaccinations, string mzcrHistory, string whoInfections)
+        {
+            // (1)
+            var listWho = await ProcessData.ProcessWhoVaccinated(whoVaccinations);
+            await DataToDb.InitializeCountries(listWho);
+            await DataToDb.SaveToDb(listWho);
+            // (2)
+            await DataToDb.SavetoDb(ProcessData.ProcessMzcr(listMzcr).Result);
+            var mzcrMissing = GetMzcrMissingDates().Result;
+            // (3)
+            if (mzcrMissing.Count > 0)
+            {
+                foreach (var missingDate in mzcrMissing)
+                {
+                    await DataToDb.SavetoDb(ProcessData.ProcessMzcrDate(mzcrHistory, missingDate).Result);
+                }
+            }
+  
+            // (4)
+            await DataToDb.SavetoDb(ProcessData.ProcessWhoInfected(whoInfections).Result);
+            var whoMissing = GetWhoMissingDates().Result;
+            if (whoMissing.Count > 0)
+            {
+                foreach (var missingDate in whoMissing)
+                {
+                    await DataToDb.SavetoDb(ProcessData.ProcessWhoInfected(whoInfections, missingDate).Result);
+                }
+            }
+            await DataToDb.FixDailyInfected();
+            await UpdateInfectedToDate();
+            await UpdateCountries();
+            await PlotInfectedData();
+        }
+
 
         /// <summary>
         /// Occurs once the date is changed in the DatePicker. Updates the Infected DataGrid with the data relevant to that date.
