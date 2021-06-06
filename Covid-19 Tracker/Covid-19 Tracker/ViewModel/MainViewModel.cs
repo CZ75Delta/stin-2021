@@ -96,6 +96,7 @@ namespace Covid_19_Tracker.ViewModel
             Log.Information("Starting update.");
             if (await CheckInternetConnection.CheckForInternetConnection(1000))
             {
+                PickEnabled = false;
                 try
                 {
                     //TODO otestovat vypojení při aktualizaci
@@ -108,10 +109,10 @@ namespace Covid_19_Tracker.ViewModel
                     var whoInfections = await Task.Run(async () => await ApiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv"));
 
                     if (whoVaccinations == null || mzcrData == null || mzcrHistory == null || whoInfections == null) throw new HttpRequestException();
-                    PickEnabled = false;
+
+                    _lastUpdate = DateTime.Now;
                     CountriesPicked.Clear();
                     Countries.Clear();
-                    _lastUpdate = DateTime.Now;
 
                     await Task.Run( async () => await SaveData(mzcrData, whoVaccinations, mzcrHistory, whoInfections));
                 }

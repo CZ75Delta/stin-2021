@@ -11,11 +11,12 @@ namespace Covid_19_Tracker.Model
     {
         public static async Task<string> DownloadFromUrl(string url)
         {
+            if (!await CheckInternetConnection.CheckForInternetConnection(1000)) return null;
             try
             {
-                var request = (HttpWebRequest)WebRequest.Create(url);
+                var request = (HttpWebRequest) WebRequest.Create(url);
                 request.Timeout = 15000;
-                var response = (HttpWebResponse)request.GetResponseAsync().Result;
+                var response = (HttpWebResponse) await request.GetResponseAsync();
 
                 if ("gzip".Equals(response.ContentEncoding))
                 {
@@ -25,7 +26,8 @@ namespace Covid_19_Tracker.Model
                 }
                 else
                 {
-                    var content = await new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEndAsync();
+                    var content =
+                        await new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEndAsync();
                     return content;
                 }
             }
