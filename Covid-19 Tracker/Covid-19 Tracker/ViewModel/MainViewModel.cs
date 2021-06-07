@@ -111,17 +111,19 @@ namespace Covid_19_Tracker.ViewModel
                     var whoInfections = await Task.Run(() => ApiHandler.DownloadFromUrl("https://covid19.who.int/WHO-COVID-19-global-data.csv"));
 
                     if (whoVaccinations == null || mzcrData == null || mzcrHistory == null || whoInfections == null) throw new HttpRequestException();
+                    else
+                    {
+                        _lastUpdate = DateTime.Now;
 
-                    _lastUpdate = DateTime.Now;
-
-                    await Task.Run( async () => await SaveData(mzcrData, whoVaccinations, mzcrHistory, whoInfections));
+                        await Task.Run(async () => await SaveData(mzcrData, whoVaccinations, mzcrHistory, whoInfections));
+                    }
                 }
                 catch (Exception ex) when (ex is WebException or HttpRequestException)
                 {
                     ProgressText = "Aktualizace selhala.";
                     Log.Information("Update Failed. -> ", ex.Message);
-                    _updating = false;
-                    UpdateData();
+                    UpdateEnabled = _updating = false;
+                    SetRetryTextTimer();
                     return;
                 }
                 VaccinatedInit();

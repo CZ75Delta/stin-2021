@@ -7,9 +7,18 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
     <StartupObject>Covid_19_Tracker.App</StartupObject>
+    <Version>1.1</Version>
+    <Authors>Vít Škrbel, Petr Schönherr, Pavel Vican, Tomáš Novotný</Authors>
+    <Company>STI - FM TUL</Company>
+    <Description>Aplikace pro sledování určitých statistik o nemoci Covid-19.</Description>
+    <Copyright>Vít Škrbel, Petr Schönherr, Pavel Vican, Tomáš Novotný 2021</Copyright>
+    <NeutralLanguage>cs-CZ</NeutralLanguage>
+    <PackageIcon>coronavirus.png</PackageIcon>
+    <PackageIconUrl />
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\coronavirus.png" />
     <None Remove="Resources\icon.ico" />
   </ItemGroup>
 
@@ -29,6 +38,7 @@
 
   <ItemGroup>
     <None Remove="Resources\icon.ico" />
+    <Resource Include="Resources\coronavirus.png" />
     <Resource Include="Resources\icon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
