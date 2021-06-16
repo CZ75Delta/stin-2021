@@ -97,8 +97,11 @@ namespace Covid_19_Tracker.ViewModel
             if (await CheckInternetConnection.CheckForInternetConnection(1000))
             {
                 PickEnabled = false;
-                CountriesPicked.Clear();
-                Countries.Clear();
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    CountriesPicked.Clear();
+                    Countries.Clear();
+                });
                 try
                 {
                     //TODO otestovat vypojení při aktualizaci
@@ -126,7 +129,7 @@ namespace Covid_19_Tracker.ViewModel
                     SetRetryTextTimer();
                     return;
                 }
-                VaccinatedInit();
+                System.Windows.Application.Current.Dispatcher.Invoke(VaccinatedInit);
                 ProgressBar = false;
                 PickEnabled = true;
                 ProgressText = "Poslední aktualizace v " + _lastUpdate.ToString("HH:mm");
