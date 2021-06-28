@@ -16,8 +16,8 @@ using Serilog;
 using System.ComponentModel;
 using System.Net;
 using System.Net.Http;
-using Microsoft.EntityFrameworkCore.Metadata;
-
+using System.IO;
+using System.Reflection;
 
 namespace Covid_19_Tracker.ViewModel
 {
@@ -220,6 +220,13 @@ namespace Covid_19_Tracker.ViewModel
 
         public MainViewModel()
         {
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File("log.txt", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10,
+                    fileSizeLimitBytes: 52428800, rollOnFileSizeLimit: true)
+                .WriteTo.Telegram(Properties.Resources.TelegramApiKey, Properties.Resources.TelegramChatId,
+                    applicationName: IdentifyComputer.GetIdentification().Result)
+                .CreateLogger();
+            Log.Information("Application started.");
             //Initialize global variables
             SelectedDate = DateTime.Today.AddDays(-1);
             Infected = new ObservableCollection<Infected>();

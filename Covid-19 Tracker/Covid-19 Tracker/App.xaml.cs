@@ -17,14 +17,6 @@ namespace Covid_19_Tracker
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            
-            Log.Logger = new LoggerConfiguration()
-                .WriteTo.File("log.txt", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10,
-                    fileSizeLimitBytes: 52428800, rollOnFileSizeLimit: true)
-                .WriteTo.Telegram(Covid_19_Tracker.Properties.Resources.TelegramApiKey, Covid_19_Tracker.Properties.Resources.TelegramChatId,
-                    applicationName: IdentifyComputer.GetIdentification().Result)
-                .CreateLogger();
-            Log.Information("Application started.");
             var assembly = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, (ResourceAssembly.GetName().Name ?? string.Empty) + ".exe");
             Log.Information(assembly);
 #if !DEBUG
