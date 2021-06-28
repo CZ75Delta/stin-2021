@@ -132,29 +132,33 @@ namespace Covid_19_Tracker.Model
         {
             await using var ctx = new TrackerDbContext();
             var reply = ApiHandler.DownloadFromUrl("https://restcountries.com/v2/all?fields=name,alpha3Code,population");
-            var countriesPopulation = JsonConvert.DeserializeObject<List<CountryPopulation>>(reply);
-            if (countriesPopulation != null)
+            if (reply != null)
             {
-                foreach (var country in countriesPopulation)
+                var countriesPopulation = JsonConvert.DeserializeObject<List<CountryPopulation>>(reply);
+                if (countriesPopulation != null)
                 {
-                    var updatedCountry =
-                        ctx.Countries.FirstOrDefaultAsync(x => x.IsoCode == country.Alpha3Code && x.Population == 0).Result ??
-                        await ctx.Countries.FirstOrDefaultAsync(x => x.Name.Equals(country.Name) && x.Population == 0);
-                    if (updatedCountry == null) continue;
-                    updatedCountry.Population = country.Population;
-                    ctx.Countries.Update(updatedCountry);
+                    foreach (var country in countriesPopulation)
+                    {
+                        var updatedCountry =
+                            ctx.Countries.FirstOrDefaultAsync(x => x.IsoCode == country.Alpha3Code && x.Population == 0).Result ??
+                            await ctx.Countries.FirstOrDefaultAsync(x => x.Name.Equals(country.Name) && x.Population == 0);
+                        if (updatedCountry == null) continue;
+                        updatedCountry.Population = country.Population;
+                        ctx.Countries.Update(updatedCountry);
+                    }
+                    var extraCountries = ctx.Countries.Where(x => x.Population == 0);
+                    await ctx.SaveChangesAsync();
+                    foreach (var country in extraCountries)
+                    {
+                        ApiHandler.DownloadFromUrl("https://restcountries.com/v2/name/" + country + "?fields=name,alpha3Code,population");
+                        var countryPopulation = JsonConvert.DeserializeObject<List<CountryPopulation>>(reply);
+                        if (countryPopulation == null) continue;
+                        country.Population = countryPopulation[0].Population;
+                        ctx.Countries.Update(country);
+                    }
                 }
-                var extraCountries = ctx.Countries.Where(x => x.Population == 0);
-                foreach (var country in extraCountries)
-                {
-                    ApiHandler.DownloadFromUrl("https://restcountries.com/v2/name/" + country + "?fields=name,alpha3Code,population");
-                    var countryPopulation = JsonConvert.DeserializeObject<List<CountryPopulation>>(reply);
-                    if (countryPopulation == null) continue;
-                    country.Population = countryPopulation[0].Population;
-                    ctx.Countries.Update(country);
-                }
+                await ctx.SaveChangesAsync();
             }
-            await ctx.SaveChangesAsync();
         }
     }
     public class CountryPopulation
