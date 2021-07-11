@@ -87,8 +87,22 @@ namespace Covid_19_Tracker.View
 
         private void ButtonAktualizace_Click(object sender, RoutedEventArgs e)
         {
-            VaccinationQueue.Clear();
+            //VaccinationQueue.Clear();
+            CountriesUpdate();
             CountriesGrid.Items.Refresh();
         }
+
+        private void CountriesUpdate()
+        {
+            var tempCountries = VaccinationQueue;
+            VaccinationQueue.Clear();
+
+            foreach (var country in tempCountries)
+            {
+                country.IsPicked = true;
+                VaccinationQueue.AddLast(country);
+            }
+        }
+
     }
 }
