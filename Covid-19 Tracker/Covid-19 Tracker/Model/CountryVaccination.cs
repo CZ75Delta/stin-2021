@@ -26,10 +26,10 @@ namespace Covid_19_Tracker.Model
             }
         }
 
-        public CountryVaccination(string name, long population, double vaccinated)
+        public CountryVaccination(string name, long population, double vaccinated, bool pick = false)
         {
-            IsPicked = false;
-            Symbol = '+';
+            IsPicked = pick;
+            Symbol = pick ? '-' : '+';
             Name = name;
             VaccinatedCounter = vaccinated;
             VaccinatedPercent = Math.Round((vaccinated) / population * 100, 1)   + " %";

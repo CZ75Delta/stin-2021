@@ -118,7 +118,7 @@
                 </StatusBarItem>
                 <Separator Grid.Column="3" />
                 <StatusBarItem Grid.Column="4">
-                    <Button Width="80" Height="20" Content="Aktualizovat" Margin="2,-1,0,0" Click="ButtonAktualizace_Click" Command="{Binding RefreshCommand}" IsEnabled="{Binding UpdateEnabled}"/>
+                    <Button Width="80" Height="20" Content="Aktualizovat" Margin="2,-1,0,0" Command="{Binding RefreshCommand}" IsEnabled="{Binding UpdateEnabled}"/>
                 </StatusBarItem>
             </StatusBar>
         </DockPanel>

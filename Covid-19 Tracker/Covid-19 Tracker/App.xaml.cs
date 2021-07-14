@@ -6,7 +6,7 @@ using System.Windows;
 using Covid_19_Tracker.Model;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using NetFwTypeLib;
+
 
 namespace Covid_19_Tracker
 {
