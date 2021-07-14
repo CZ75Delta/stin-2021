@@ -41,6 +41,7 @@ namespace Covid_19_Tracker.ViewModel
         private ObservableCollection<Infected> _infected;
         private ObservableCollection<CountryVaccination> _countries;
         private ObservableCollection<CountryVaccination> _countriesPicked;
+        private List<String> tempPickedCountryNames = new List<string>();
         private int _retrySeconds;
         private int _mzcrLastHighlightedIndex = -1;
         private int _whoLastHighlightedIndex = -1;
@@ -96,6 +97,11 @@ namespace Covid_19_Tracker.ViewModel
             Log.Information("Starting update.");
             if (await CheckInternetConnection.CheckForInternetConnection(1000))
             {
+                tempPickedCountryNames.Clear();
+                foreach (var country in CountriesPicked)
+                {
+                    tempPickedCountryNames.Add(country.Name);   
+                }
                 PickEnabled = false;
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -104,7 +110,6 @@ namespace Covid_19_Tracker.ViewModel
                 });
                 try
                 {
-                    //TODO otestovat vypojení při aktualizaci
                     var whoVaccinations = await Task.Run(() => ApiHandler.DownloadFromUrl("https://covid19.who.int/who-data/vaccination-data.csv"));
                     
                     var mzcrData = await Task.Run(() => ApiHandler.DownloadFromUrl("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/zakladni-prehled.json"));
@@ -130,6 +135,26 @@ namespace Covid_19_Tracker.ViewModel
                     return;
                 }
                 System.Windows.Application.Current.Dispatcher.Invoke(VaccinatedInit);
+                
+                if (tempPickedCountryNames.Count > 1)
+                {
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        foreach (var countryPicked in tempPickedCountryNames)
+                        {
+                            if (countryPicked.Equals("Czechia")) continue;
+                                using var ctx = new TrackerDbContext();
+                                var country = ctx.Countries.FirstOrDefault(x => x.Name == countryPicked);
+                                if (country == null) return;
+                                var vaccinated = ctx.Vaccinated.Where(x => x.CountryId == country.Id).OrderByDescending(x => x.Date).Select(x => (double)x.TotalVaccinations).First();
+                                var countryVac = new CountryVaccination(country.Name, country.Population, vaccinated, true);
+                                CountriesPicked.Add(countryVac);
+                        }
+                        UpdateVaccinatedData();
+                    });
+                }
+                
+                
                 ProgressBar = false;
                 PickEnabled = true;
                 ProgressText = "Poslední aktualizace v " + _lastUpdate.ToString("HH:mm");
@@ -199,7 +224,7 @@ namespace Covid_19_Tracker.ViewModel
                 var czDb = ctx.Countries.FirstOrDefault(x => x.Name == "Czechia");
                 if (czDb == null) return;
                 var vaccinated = ctx.Vaccinated.Where(x => x.CountryId == czDb.Id).OrderByDescending(x => x.Date).Select(x => (double)x.TotalVaccinations).First();
-                var czVac = new CountryVaccination(czDb.Name, czDb.Population, vaccinated);
+                var czVac = new CountryVaccination(czDb.Name, czDb.Population, vaccinated, true);
                 CountriesPicked.RemoveAt(czIndex);
                 CountriesPicked.Insert(czIndex, czVac);
             }
@@ -210,7 +235,7 @@ namespace Covid_19_Tracker.ViewModel
                 var vaccinated = ctx.Vaccinated.Where(x => x.CountryId == cz.Id).OrderByDescending(x => x.Date).Select(x => (double)x.TotalVaccinations).First();
                 var czVac = new CountryVaccination(cz.Name, cz.Population, vaccinated);
                 CountriesPicked.Add(czVac);
-                UpdateVaccinatedData();
+                //UpdateVaccinatedData();
             }
         }
 
