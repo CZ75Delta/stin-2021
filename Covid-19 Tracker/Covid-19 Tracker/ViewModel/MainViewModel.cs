@@ -41,6 +41,8 @@ namespace Covid_19_Tracker.ViewModel
         private ObservableCollection<Infected> _infected;
         private ObservableCollection<CountryVaccination> _countries;
         private ObservableCollection<CountryVaccination> _countriesPicked;
+        private List<String> lastPickedCountries = new List<string>();
+        private List<CountryVaccination> countriesToAdd = new List<CountryVaccination>();
         private int _retrySeconds;
         private int _mzcrLastHighlightedIndex = -1;
         private int _whoLastHighlightedIndex = -1;
@@ -97,6 +99,13 @@ namespace Covid_19_Tracker.ViewModel
             if (await CheckInternetConnection.CheckForInternetConnection(1000))
             {
                 PickEnabled = false;
+
+                lastPickedCountries.Clear();
+                foreach(var country in CountriesPicked)
+                {
+                    if(country.Name.Equals("Czechia"))continue;
+                    lastPickedCountries.Add(country.Name);   
+                }
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
                     CountriesPicked.Clear();
@@ -130,6 +139,12 @@ namespace Covid_19_Tracker.ViewModel
                     return;
                 }
                 System.Windows.Application.Current.Dispatcher.Invoke(VaccinatedInit);
+                foreach(CountryVaccination cc in countriesToAdd)
+                {
+                    CountriesPicked.Add(cc);
+                }
+                UpdateVaccinatedData();
+
                 ProgressBar = false;
                 PickEnabled = true;
                 ProgressText = "Poslední aktualizace v " + _lastUpdate.ToString("HH:mm");
@@ -413,11 +428,17 @@ namespace Covid_19_Tracker.ViewModel
             if (ctx.Countries.Any())
             {
                 var countries = new List<CountryVaccination>();
+                countriesToAdd = new List<CountryVaccination>();
                 foreach (var country in ctx.Countries)
                 {
                     if (country.Name == "Czechia") continue;
                     var vaccinated = await ctx.Vaccinated.Where(x => x.Id == country.Id).OrderByDescending(x => x.Date).Select(x => (double)x.TotalVaccinations).FirstAsync();
                     var cc = new CountryVaccination(country.Name, country.Population, vaccinated);
+                    if (lastPickedCountries.Contains(country.Name))
+                    {
+                        cc.IsPicked = true;
+                        countriesToAdd.Add(cc);
+                    }
                     cc.PropertyChanged += CountryPropertyChanged;
                     countries.Add(cc);
                 }

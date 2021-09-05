@@ -33,7 +33,7 @@ namespace Covid_19_Tracker.View
             var selectedCountry = (CountryVaccination)e.AddedItems[0];
             if (selectedCountry is {IsPicked: true})
             {
-                VaccinationQueue.Remove(VaccinationQueue.First(s => s == selectedCountry));
+                VaccinationQueue.Remove(VaccinationQueue.First(s => s.Name == selectedCountry.Name));
                 selectedCountry.IsPicked = false;
             }
             else
@@ -87,7 +87,7 @@ namespace Covid_19_Tracker.View
 
         private void ButtonAktualizace_Click(object sender, RoutedEventArgs e)
         {
-            VaccinationQueue.Clear();
+            //VaccinationQueue.Clear();
             CountriesGrid.Items.Refresh();
         }
     }
