@@ -55,10 +55,11 @@ namespace Covid_19_Tracker.Model
         /// <returns>Dictionary
         /// keys - Date, Source, Country, TotalCases (celkový počet nakažených), NewCases
         /// </returns>
-        public static async Task<Dictionary<string, string>> ProcessWhoInfected(string csv)
+        public static async Task<Dictionary<string, string>> ProcessWhoInfected(string csv, int daysBack = 1)
         {
             var lines = csv.Split('\n');
-            var dateYesterday = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
+            var dateYesterdayFake = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
+            var dateYesterday = DateTime.Now.AddDays(-daysBack).ToString("yyyy-MM-dd");
             foreach (var line in lines)
             {
                 if (!line.StartsWith(dateYesterday)) continue;
@@ -66,7 +67,7 @@ namespace Covid_19_Tracker.Model
                 var data = line.Split(',');
                 var dict = new Dictionary<string, string>
                 {
-                    {"Date", dateYesterday},
+                    {"Date", dateYesterdayFake},
                     {"Source", "who"},
                     {"Country", "Czechia"},
                     {"TotalCases", data[5]},
@@ -74,8 +75,8 @@ namespace Covid_19_Tracker.Model
                 };
                 return await Task.FromResult(dict);
             }
-
-            return null;
+            int daysBackMore = daysBack + 1;
+            return await ProcessWhoInfected(csv, daysBackMore);
         }
 
         public static async Task<Dictionary<string, string>> ProcessWhoInfected(string csv, DateTime date)
