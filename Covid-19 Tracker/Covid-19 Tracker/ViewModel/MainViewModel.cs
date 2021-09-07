@@ -450,9 +450,14 @@ namespace Covid_19_Tracker.ViewModel
         private void CountryPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             var country = (CountryVaccination)sender;
-            if (CountriesPicked.Contains(country))
+            if (CountriesPicked.Any(x => x.Name.Equals(country.Name)))
             {
-                CountriesPicked.Remove(country);
+                if (!CountriesPicked.Remove(country))
+                {
+                    var cc = CountriesPicked.Where(x => x.Name.Equals(country.Name)).Single();
+                    cc.IsPicked = false;
+                    CountriesPicked.Remove(cc);
+                }
             }
             else
             {
