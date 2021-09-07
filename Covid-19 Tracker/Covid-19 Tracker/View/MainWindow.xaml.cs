@@ -33,7 +33,7 @@ namespace Covid_19_Tracker.View
             var selectedCountry = (CountryVaccination)e.AddedItems[0];
             if (selectedCountry is {IsPicked: true})
             {
-                VaccinationQueue.Remove(VaccinationQueue.First(s => s.Name == selectedCountry.Name));
+                VaccinationQueue.Remove(VaccinationQueue.First(s => s.Name.Equals(selectedCountry.Name)));
                 selectedCountry.IsPicked = false;
             }
             else
