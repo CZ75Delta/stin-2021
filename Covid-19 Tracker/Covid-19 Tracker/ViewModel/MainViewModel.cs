@@ -141,7 +141,10 @@ namespace Covid_19_Tracker.ViewModel
                 System.Windows.Application.Current.Dispatcher.Invoke(VaccinatedInit);
                 foreach(CountryVaccination cc in countriesToAdd)
                 {
-                    CountriesPicked.Add(cc);
+                    App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
+                    {
+                        CountriesPicked.Add(cc);
+                    });
                 }
                 UpdateVaccinatedData();
 
@@ -338,7 +341,10 @@ namespace Covid_19_Tracker.ViewModel
             }
             VaccinatedPlotControl.Plot.XTicks(_vaccinatedPositions, _vaccinatedLabels);
             VaccinatedPlotControl.Plot.SetAxisLimits(xMax: _vaccinatedPositions.Length - 0.5, yMin: 0, yMax: 100);
-            VaccinatedPlotControl.Render();
+            App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
+            {
+                VaccinatedPlotControl.Render();
+            });
         }
 
         private void GetVaccinatedData()
